@@ -1,6 +1,6 @@
 import sys
 import requests
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QTextEdit, QTableWidget, QTableWidgetItem, QComboBox, QMessageBox, QLineEdit, QCheckBox, QListWidget, QFileDialog
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout,QHBoxLayout, QLabel, QPushButton, QTextEdit,QTableWidget, QTableWidgetItem, QComboBox,QMessageBox,QLineEdit,QCheckBox,QListWidget,QFileDialog
 from PyQt5.QtGui import QIcon
 
 
@@ -50,7 +50,6 @@ class MainApp(QMainWindow):
         self.setup_comparer_tab()
         self.setup_extender_tab()
         # Add content to proxy tab
-
     def setup_proxy_tab(self):
         layout = QVBoxLayout()
 
@@ -102,6 +101,7 @@ class MainApp(QMainWindow):
         pass
 
         # Add content to target tab
+        
 
     def setup_target_tab(self):
         layout = QVBoxLayout()
@@ -219,28 +219,24 @@ class MainApp(QMainWindow):
         payload = self.payload_text_edit.toPlainText()
 
         if not request:
-            QMessageBox.warning(
-                self, "Warning", "Please provide a request to intrude.")
+            QMessageBox.warning(self, "Warning", "Please provide a request to intrude.")
             return
 
         if not payload:
-            QMessageBox.warning(
-                self, "Warning", "Please provide a payload for the intruder.")
+            QMessageBox.warning(self, "Warning", "Please provide a payload for the intruder.")
             return
 
         # Parse the payload based on the selected payload type
         selected_payload_type = self.payload_type_combo.currentText()
         payloads = []
         if selected_payload_type == "Simple List":
-            # Assuming each line contains a separate payload
-            payloads = payload.split("\n")
+            payloads = payload.split("\n")  # Assuming each line contains a separate payload
         elif selected_payload_type == "Numbers":
             try:
                 start, end = map(int, payload.split("-"))
                 payloads = list(range(start, end + 1))
             except ValueError:
-                QMessageBox.warning(
-                    self, "Warning", "Invalid number range format. Please provide start and end separated by '-'")
+                QMessageBox.warning(self, "Warning", "Invalid number range format. Please provide start and end separated by '-'")
                 return
         elif selected_payload_type == "Characters":
             payloads = [char for char in payload]
@@ -256,6 +252,7 @@ class MainApp(QMainWindow):
 
         # Display results in a user-friendly manner
         QMessageBox.information(self, "Intruder Results", "\n".join(results))
+
 
     def stop_intruder(self):
         # Placeholder logic for stopping intruder
@@ -298,8 +295,7 @@ class MainApp(QMainWindow):
 
         # Content type combo box
         self.content_type_combo = QComboBox()
-        self.content_type_combo.addItems(
-            ["application/json", "application/xml", "text/plain"])
+        self.content_type_combo.addItems(["application/json", "application/xml", "text/plain"])
         layout.addWidget(QLabel("Content Type:"))
         layout.addWidget(self.content_type_combo)
 
@@ -351,8 +347,7 @@ class MainApp(QMainWindow):
             auth = (username, password)
 
         try:
-            response = requests.request(
-                method, url, data=request, headers=headers, auth=auth)
+            response = requests.request(method, url, data=request, headers=headers, auth=auth)
             response_text = f"Status Code: {response.status_code}\n\n{response.text}"
             self.response_text_edit.setPlainText(response_text)
         except requests.RequestException as e:
@@ -364,8 +359,7 @@ class MainApp(QMainWindow):
         if request:
             with open("saved_request.txt", "w") as file:
                 file.write(request)
-            QMessageBox.information(
-                self, "Save Request", "Request saved successfully.")
+            QMessageBox.information(self, "Save Request", "Request saved successfully.")
         else:
             QMessageBox.warning(self, "Save Request", "No request to save.")
 
@@ -376,7 +370,6 @@ class MainApp(QMainWindow):
         self.headers_text_edit.clear()
         self.username_input.clear()
         self.password_input.clear()
-
     def setup_sequencer_tab(self):
         layout = QVBoxLayout()
 
@@ -388,8 +381,7 @@ class MainApp(QMainWindow):
         self.input_text_edit = QTextEdit()
         self.output_text_edit = QTextEdit()
         self.input_text_edit.setPlaceholderText("Enter text to sequence")
-        self.output_text_edit.setPlaceholderText(
-            "Sequence results will appear here")
+        self.output_text_edit.setPlaceholderText("Sequence results will appear here")
         layout.addWidget(self.input_text_edit)
         layout.addWidget(self.output_text_edit)
 
@@ -408,8 +400,7 @@ class MainApp(QMainWindow):
     def start_sequence(self):
         input_text = self.input_text_edit.toPlainText()
         if not input_text:
-            self.output_text_edit.setPlainText(
-                "Please enter text to sequence.")
+            self.output_text_edit.setPlainText("Please enter text to sequence.")
             return
 
         # Perform sequence generation and calculation here
@@ -427,6 +418,7 @@ class MainApp(QMainWindow):
         # For now, simply return the input text as is
         return input_text
 
+
     def setup_decoder_tab(self):
         layout = QVBoxLayout()
 
@@ -438,8 +430,7 @@ class MainApp(QMainWindow):
         input_text_edit = QTextEdit()
         output_text_edit = QTextEdit()
         input_text_edit.setPlaceholderText("Enter text to decode/encode")
-        output_text_edit.setPlaceholderText(
-            "Decoded/encoded text will appear here")
+        output_text_edit.setPlaceholderText("Decoded/encoded text will appear here")
         layout.addWidget(input_text_edit)
         layout.addWidget(output_text_edit)
 
@@ -474,13 +465,12 @@ class MainApp(QMainWindow):
         button_layout.addWidget(decode_button)
         button_layout.addWidget(clear_button)
         layout.addLayout(button_layout)
-
+        
         self.decoder_tab.setLayout(layout)
-
     def Decode(self):
-        # logic to decode here
+        #logic to decode here
         pass
-
+    
     def setup_comparer_tab(self):
         layout = QVBoxLayout()
 
@@ -531,26 +521,21 @@ class MainApp(QMainWindow):
             text1_lines = text1.splitlines()
             text2_lines = text2.splitlines()
             if len(text1_lines) != len(text2_lines):
-                QMessageBox.information(
-                    self, "Comparison Result", "Texts have different line counts.")
+                QMessageBox.information(self, "Comparison Result", "Texts have different line counts.")
                 return
 
             for line1, line2 in zip(text1_lines, text2_lines):
                 if not self.compare_line(line1, line2, case_sensitive):
-                    QMessageBox.information(
-                        self, "Comparison Result", "Texts are different.")
+                    QMessageBox.information(self, "Comparison Result", "Texts are different.")
                     return
 
-            QMessageBox.information(
-                self, "Comparison Result", "Texts are identical.")
+            QMessageBox.information(self, "Comparison Result", "Texts are identical.")
 
         else:
             if self.compare_line(text1, text2, case_sensitive):
-                QMessageBox.information(
-                    self, "Comparison Result", "Texts are identical.")
+                QMessageBox.information(self, "Comparison Result", "Texts are identical.")
             else:
-                QMessageBox.information(
-                    self, "Comparison Result", "Texts are different.")
+                QMessageBox.information(self, "Comparison Result", "Texts are different.")
 
     def compare_line(self, line1, line2, case_sensitive):
         if case_sensitive:
@@ -591,24 +576,19 @@ class MainApp(QMainWindow):
 
     def load_extension(self):
         file_dialog = QFileDialog()
-        file_path, _ = file_dialog.getOpenFileName(
-            self, "Select Extension", "", "Python Files (*.py)")
+        file_path, _ = file_dialog.getOpenFileName(self, "Select Extension", "", "Python Files (*.py)")
         if file_path:
             self.extension_list.addItem(file_path)
-            QMessageBox.information(
-                self, "Extension Loaded", "Extension loaded successfully.")
+            QMessageBox.information(self, "Extension Loaded", "Extension loaded successfully.")
 
     def unload_extension(self):
         selected_item = self.extension_list.currentItem()
         if selected_item:
-            self.extension_list.takeItem(
-                self.extension_list.row(selected_item))
-            QMessageBox.information(
-                self, "Extension Unloaded", "Extension unloaded successfully.")
+            self.extension_list.takeItem(self.extension_list.row(selected_item))
+            QMessageBox.information(self, "Extension Unloaded", "Extension unloaded successfully.")
         else:
-            QMessageBox.warning(self, "No Extension Selected",
-                                "Please select an extension to unload.")
-
+            QMessageBox.warning(self, "No Extension Selected", "Please select an extension to unload.")
+    
     def configure_extension(self):
         pass
 
