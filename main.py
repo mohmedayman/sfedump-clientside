@@ -1,13 +1,13 @@
 import sys
 from navBar import *
-from proxy import * 
-from target import *
-from sequencer import *
-from intruder import *
-from repeater import *
-from decoder import *
-from comparer import *
-from extender import *
+from Screens.Proxy.proxy import * 
+from Screens.Target.target import *
+from Screens.Sequencer.sequencer import *
+from Screens.Intruder.intruder import *
+from Screens.Repeater.repeater import *
+from Screens.Decoder.decoder import *
+from Screens.Comparer.comparer import *
+from Screens.Extender.extender import *
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout,QHBoxLayout, QLabel, QPushButton, QTextEdit,QTableWidget, QTableWidgetItem, QComboBox,QMessageBox,QLineEdit,QCheckBox,QListWidget,QFileDialog
 from PyQt5.QtGui import QIcon
 

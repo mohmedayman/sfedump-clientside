@@ -1,0 +1,12 @@
+{
+    "python.analysis.extraPaths": [
+        "./Screens/proxy",
+        "./Screens/target",
+        "./Screens/sequencer",
+        "./Screens/intruder",
+        "./Screens/repeater",
+        "./Screens/decoder",
+        "./Screens/comparer",
+        "./Screens/extender"
+    ]
+}
