@@ -2,3 +2,4 @@ wslenv
 venv
 .env
 env
+__pycache__
