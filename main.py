@@ -9,9 +9,8 @@ from Screens.Repeater.repeater import *
 from Screens.Decoder.decoder import *
 from Screens.Comparer.comparer import *
 from Screens.Extender.extender import *
-from Screens.Scanner.scanner import *
-from Screens.Sniffer.sniffer import *
-from Screens.Exploiter.exploiter import *
+from Screens.Network.network import *
+from Screens.DNS.dns import *
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QTextEdit, QTableWidget, QTableWidgetItem, QComboBox, QMessageBox, QLineEdit, QCheckBox, QListWidget, QFileDialog
 from PyQt5.QtGui import QIcon
 
@@ -43,10 +42,12 @@ class MainApp(QMainWindow):
         setup_repeater_tab(self)
         # setup_comparer_tab(self)
         setup_extender_tab(self)
-        setup_scanning_tab(self)
-        setup_sniffer_tab(self)
-        setup_exploiter_tab(self)
+        # setup_scanning_tab(self)
+        # setup_sniffer_tab(self)
+        # setup_exploiter_tab(self)
+        setup_network_tab(self)
         setup_dashboard_tab(self)
+        setup_dns_tab(self)
 
 
 if __name__ == "__main__":

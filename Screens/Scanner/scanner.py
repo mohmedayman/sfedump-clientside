@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QTabWidget, QPushButton
 
-def setup_scanning_tab(parent):
+def setup_scanning_tab(scanning_tab):
         # Create sub-tabs for scanning
         sub_tabs = QTabWidget()
 
@@ -19,7 +19,7 @@ def setup_scanning_tab(parent):
         layout.addWidget(sub_tabs)
         
 
-        parent.scanning_tab.setLayout(layout)
+        scanning_tab.setLayout(layout)
 
 def setup_host_discovery_tab():
         pass

@@ -12,9 +12,8 @@ def createNavBar(parent):
         parent.decoder_tab = QWidget()
         #parent.comparer_tab = QWidget()
         parent.extender_tab = QWidget()
-        parent.scanning_tab = QWidget()
-        parent.sniffer_tab = QWidget()
-        parent.exploiter_tab = QWidget()
+        parent.network_tab = QWidget()
+        parent.dns_tab = QWidget()
 
         # Add tabs to tab widget
         parent.tabs.addTab(parent.dashboard_tab, "Dashboard")
@@ -26,6 +25,5 @@ def createNavBar(parent):
         parent.tabs.addTab(parent.decoder_tab, "Decoder")
         #parent.tabs.addTab(parent.comparer_tab, "Comparer")
         parent.tabs.addTab(parent.extender_tab, "Extender")
-        parent.tabs.addTab(parent.scanning_tab, "Scanning")
-        parent.tabs.addTab(parent.sniffer_tab, "Sniffer")
-        parent.tabs.addTab(parent.exploiter_tab, "Exploiter")
+        parent.tabs.addTab(parent.network_tab, "Network")
+        parent.tabs.addTab(parent.dns_tab, "DNS")
