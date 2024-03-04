@@ -16,8 +16,9 @@ from PyQt5.QtGui import QIcon
 
 
 class MainApp(QMainWindow):
-    def __init__(self):
+    def __init__(self,app):
         super().__init__()
+        self.app = app
 
         self.setWindowTitle("Burp Suite Application")
         self.setGeometry(100, 100, 800, 600)
@@ -52,6 +53,6 @@ class MainApp(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    main_app = MainApp()
+    main_app = MainApp(app)
     main_app.show()
     sys.exit(app.exec_())
