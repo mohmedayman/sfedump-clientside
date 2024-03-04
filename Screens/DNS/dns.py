@@ -24,5 +24,5 @@ def setup_dns_tab(parent):
 
     parent.dns_tab.setLayout(layout)
     setup_lookup_tab(parent, lookup_tab)
-    setup_reverse_lookup_tab(reverse_lookup_tab)
-    setup_records_tab(records_tab)
+    setup_reverse_lookup_tab(parent,reverse_lookup_tab)
+    setup_records_tab(parent,records_tab)

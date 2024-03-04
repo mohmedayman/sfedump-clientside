@@ -19,6 +19,15 @@ class Validator():
             self.errors.append("Invalid Domain")
 
         return self
+    def ip(self, ip: Optional[str], nullable: Optional[bool] = False):
+        if nullable and not ip:
+            return self
+
+        val = validators.ipv4(ip)
+        if not val:
+            self.errors.append("Invalid IP-address")
+
+        return self
 
     def isin(self, value: Optional[any], values: List, nullable: Optional[bool] = False):
         if nullable and not value:
