@@ -1,51 +1,20 @@
 from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton,QTextEdit
 from PyQt5.QtCore import Qt, QObject
 from Service import DNS
+from Widgets.SearchButton import *
+from Widgets.ClearButton import *
+from Widgets.ResponseBox import *
 
 def setup_records_tab(self: QObject, records_tab):
     button_layout = QHBoxLayout()
-    search_button = QPushButton(text="Search")
-    clear_button = QPushButton(text="Clear")
+    search_button =SearchButton()
+    clear_button = ClearButton()
     button_layout.addWidget(search_button)
     button_layout.addWidget(clear_button)
-    self.res_box = QTextEdit()
-    self.res_box.setReadOnly(True)
-    clear_button.clicked.connect(lambda: self.res_box.clear())
+    self.res_box = ResponseBox()
+    clear_button.clicked.connect(self.res_box.clear_text)
 
-    search_button.setStyleSheet(
-            "QPushButton {"
-            "   background-color: #6EB5FF;"  # Light blue background color
-            "   color: white;"                 # White text color
-            "   border: none;"                 # No border
-            "   padding: 8px 16px;"            # Padding for better appearance
-            "}"
-            "QPushButton:hover {"
-            "   background-color: #4D94FF;"   # Lighter blue on hover
-            "}"
-            "QPushButton:pressed {"
-            "   background-color: #3366CC;"    # Darker blue when pressed
-            "}"
-        )
-    clear_button.setStyleSheet(
-        "QPushButton {"
-            "   background-color: lightgray;"  
-            "   border: none;"  
-            "   padding: 8px 16px;" 
-            "}"
-            "QPushButton:hover {"
-            "   background-color: gray;"   # Lighter blue on hover
-            "}"
-    )
-    self.res_box.setStyleSheet(
-            "QTextEdit {"
-            "   background-color: #f0f0f0;"  # Black background color
-            "   color: #1a1a5c;"              # White text color
-            "   border: none;"              # No border
-            "   padding: 8px;"              # Padding for better appearance
-            "}"
-        )
-
-    api = DNS.DNSService(records_tab, button=search_button, output=self.res_box)
+    api = DNS.DNSRecordsService(self, button=search_button, output=self.res_box)
     layout = QVBoxLayout()
     # dial = Dialog("get", "/enums/dns/lookup")
 

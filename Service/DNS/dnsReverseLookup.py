@@ -4,7 +4,7 @@ from PyQt5.QtCore import QObject
 from requests import Response
 
 
-class DNSService(BaseService):
+class DNSReverseLookupService(BaseService):
     def __init__(self, main: QObject, button: QPushButton, output: QTextEdit) -> None:
         super().__init__(main)
         self.button = button
@@ -25,13 +25,6 @@ class DNSService(BaseService):
             formatted_data = "\n".join(f"{key}: {', '.join(value)}" if value else f"{key}: (empty)" for key, value in data.items())
         
         self.output.setText(formatted_data)
-
-    def lookup(self, target: str):
-
-        if self.validator.domain(target).validate():
-
-            self.request("get", "/enums/dns/lookup",
-                         params={"domain_name": target})
             
     def reverse_lookup(self, target2: str):
 
@@ -39,10 +32,3 @@ class DNSService(BaseService):
 
             self.request("get", "/enums/dns/reverse-lookup",
                          params={"ip_address": target2})
-            
-    def records(self, target: str):
-
-        if self.validator.domain(target).validate():
-
-            self.request("get", "/enums/dns/records",
-                         params={"domain_name": target})

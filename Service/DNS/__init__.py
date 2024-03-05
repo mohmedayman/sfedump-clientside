@@ -1,3 +1,5 @@
-from .dns import DNSService
+from .dnsLookup import DNSLookupService
+from .dnsReverseLookup import DNSReverseLookupService
+from .dnsRecords import DNSRecordsService
 
-__all__ = ["DNSService"]
+__all__ = ["DNSLookupService","DNSReverseLookupService","DNSRecordsService"]
