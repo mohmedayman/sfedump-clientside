@@ -4,7 +4,7 @@ from PyQt5.QtCore import QObject
 from requests import Response
 
 
-class DNSLookupService(BaseService):
+class IPScannerService(BaseService):
     def __init__(self, main: QObject, button: QPushButton, output: QTextEdit) -> None:
         super().__init__(main)
         self.button = button
@@ -20,15 +20,11 @@ class DNSLookupService(BaseService):
         res: Response = kwargs['response']
         self.button.setDisabled(False)
         data = res.json()['data']
-        formatted_data=data
-        if(isinstance(data,dict)):
-            formatted_data = "\n".join(f"{key}: {', '.join(value)}" if value else f"{key}: (empty)" for key, value in data.items())
-        
+        formatted_data = '\n'.join(data)
         self.output.setText(formatted_data)
 
-    def lookup(self, target: str):
+    def ip_scanner(self, target: str,type: str):
 
-        if self.validator.domain(target).validate():
-
-            self.request("get", "/enums/dns/lookup",
-                         params={"domain_name": target})
+        if self.validator.ip(target).validate():
+            self.request("get", "/host-discover/ip-scanner",
+                         params={"ip_address": target,"type":type})

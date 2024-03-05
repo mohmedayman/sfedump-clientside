@@ -4,6 +4,7 @@ from Service import DNS
 from Widgets.SearchButton import *
 from Widgets.ClearButton import *
 from Widgets.ResponseBox import *
+from Widgets.TargetInput import *
 
 def setup_records_tab(self: QObject, records_tab):
     button_layout = QHBoxLayout()
@@ -21,13 +22,8 @@ def setup_records_tab(self: QObject, records_tab):
     # Add input box and dropdown list
     input_layout = QVBoxLayout()
     target_label = QLabel("Target:")
-    target_input = QLineEdit()
+    target_input = TargetInput()
     target_input.setPlaceholderText("domain_name")
-    target_input.setStyleSheet(
-            "QLineEdit { border: 1px solid lightgray; }"
-            "QLineEdit:focus { border: 1px solid black; }"
-        )
-    target_input.setFixedHeight(40)
     input_layout.addWidget(target_label)
     input_layout.addWidget(target_input)
 
