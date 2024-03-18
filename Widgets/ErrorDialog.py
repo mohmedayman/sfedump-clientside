@@ -12,10 +12,9 @@ class ErrorDialog(QDialog):
         self.buttonBox.accepted.connect(self.accept)
 
         # label = QLabel(title)
-
+        print(errors)
         errors = "\n".join(
             list(map(lambda dic: dic.get("message", ""), errors)))
-
         text_box = QTextEdit(errors)
         text_box.setReadOnly(True)
 

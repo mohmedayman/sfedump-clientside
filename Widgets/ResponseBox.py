@@ -13,4 +13,5 @@ class ResponseBox(QTextEdit):
             "}"
         )
     def clear_text(self):
+        print("here")
         self.clear()

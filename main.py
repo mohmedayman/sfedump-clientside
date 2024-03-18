@@ -20,7 +20,7 @@ class MainApp(QMainWindow):
         super().__init__()
         self.app = app
 
-        self.setWindowTitle("Burp Suite Application")
+        self.setWindowTitle("Penteration testing platform")
         self.setGeometry(100, 100, 800, 600)
         self.setWindowIcon(QIcon("assets/imgs/icon.jpeg"))
         main_widget = QWidget()

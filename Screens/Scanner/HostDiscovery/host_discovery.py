@@ -6,6 +6,7 @@ from Widgets.ClearButton import *
 from Widgets.ResponseBox import *
 from Widgets.TargetInput import *
 from Screens.Scanner.HostDiscovery.ip_scanner import *
+from Screens.Scanner.HostDiscovery.port_scanner import *
 from Screens.Scanner.HostDiscovery.service_scanner import *
 from Screens.Scanner.HostDiscovery.footprinting import *
 
@@ -32,6 +33,7 @@ def setup_host_discovery_tab(self: QObject, host_discovery_tab):
 
         host_discovery_tab.setLayout(layout)
         setup_ip_scanner_tab(host_discovery_tab,ip_scanner_tab)
+        setup_port_scanner_tab(host_discovery_tab,port_scanner_tab)
         setup_service_scanner_tab(host_discovery_tab,service_scanner_tab)
         setup_footprinting_tab(host_discovery_tab,footprinting_tab)
         
