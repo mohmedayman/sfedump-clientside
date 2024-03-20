@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QTabWidget, QPushButton
-from Screens.Scanner.HostDiscovery.host_discovery import *
+from Screens.Network.Scanner.HostDiscovery.host_discovery import *
 from PyQt5.QtCore import Qt, QObject
 
 
