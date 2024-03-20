@@ -16,11 +16,12 @@ from PyQt5.QtGui import QIcon
 
 
 class MainApp(QMainWindow):
-    def __init__(self,app):
+    def __init__(self, app):
         super().__init__()
         self.app = app
 
-        self.setWindowTitle("Penetration Testing Framework")
+        self.setWindowTitle("Penteration testing platform")
+
         self.setGeometry(100, 100, 800, 600)
         self.setWindowIcon(QIcon("assets/imgs/icon.jpeg"))
         main_widget = QWidget()
