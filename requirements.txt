@@ -10,3 +10,4 @@ pyqtspinner==2.0.0
 requests==2.31.0
 urllib3==2.2.0
 validators==0.22.0
+scapy==2.5.0
