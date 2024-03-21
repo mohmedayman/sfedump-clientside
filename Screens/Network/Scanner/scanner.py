@@ -1,19 +1,15 @@
-<<<<<<< Updated upstream:Screens/Network/Scanner/scanner.py
-from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QTabWidget, QPushButton
-from Screens.Network.Scanner.HostDiscovery.host_discovery import *
-=======
+
 from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QTabWidget,QWidget
->>>>>>> Stashed changes:Screens/Scanner/scanner.py
 from PyQt5.QtCore import Qt, QObject
 from Service import DNS
 from Widgets.SearchButton import *
 from Widgets.ClearButton import *
 from Widgets.ResponseBox import *
 from Widgets.TargetInput import *
-from Screens.Scanner.HostDiscovery.ip_scanner import *
-from Screens.Scanner.HostDiscovery.port_scanner import *
-from Screens.Scanner.HostDiscovery.service_scanner import *
-from Screens.Scanner.HostDiscovery.footprinting import *
+from Screens.Network.Scanner.HostDiscovery.ip_scanner import *
+from Screens.Network.Scanner.HostDiscovery.port_scanner import *
+from Screens.Network.Scanner.HostDiscovery.service_scanner import *
+from Screens.Network.Scanner.HostDiscovery.footprinting import *
 
 def setup_scanning_tab(self: QObject, host_discovery_tab):
      # Create sub-tabs for scanning
