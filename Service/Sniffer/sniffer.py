@@ -2,12 +2,12 @@ from Service import BaseService
 from PyQt5.QtWidgets import QPushButton, QLineEdit, QTextEdit
 from PyQt5.QtCore import QObject, pyqtSlot, QThreadPool
 from requests import Response
-from Core.mitm import Arper
+from Core.sniffer import NetworkSniffer
 from Widgets import ErrorDialog
 from Helpers import DialogRunnable
 
 
-class MITMService(BaseService):
+class SnifferService(BaseService):
     def __init__(self, main: QObject, button: QPushButton, output: QTextEdit) -> None:
         super().__init__(main)
         self.button = button
@@ -24,12 +24,12 @@ class MITMService(BaseService):
         self.button.setDisabled(False)
         print(res)
 
-    def start(self, target: str, gateway: str):
-        if not (self.validator.ip(target).validate() and self.validator.ip(gateway).validate()):
+    def start(self, interface: str, filter: str):
+        if not (self.validator.isin(interface, ["eth0"], True).validate() and self.validator.string(filter, True).validate()):
             return
         self.button.setDisabled(True)
 
-        self.worker = Arper(self.main, target, gateway, "eth0", True)
+        self.worker = NetworkSniffer(self.main, interface, filter)
         self.worker.start()
         self.worker.output_signal.connect(self.on_output_signal)
         self.worker.error_signal.connect(self.on_error_signal)

@@ -24,6 +24,6 @@ def setup_network_tab(parent):
 
     parent.network_tab.setLayout(layout)
     setup_scanning_tab(parent, scanning_tab)
-    setup_sniffer_tab(sniffer_tab)
+    setup_sniffer_tab(parent,sniffer_tab)
     setup_mitm_tab(parent,mitm_tab)
     setup_exploiter_tab(exploiter_tab)

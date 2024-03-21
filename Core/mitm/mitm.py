@@ -39,6 +39,10 @@ class Arper(QtCore.QThread):
         self.victimmac = None
         self.terminate_signal.connect(self.on_terminate_signal)
         self.is_terminated = False
+        self.poison_thread = StoppableThread(
+            target=self.poison)
+        self.sniff_thread = StoppableThread(
+            target=self.sniffer)
 
     @QtCore.pyqtSlot(str)
     def on_terminate_signal(self, event: str):
@@ -81,12 +85,9 @@ class Arper(QtCore.QThread):
         self.begin()
 
         os.system("sysctl net.ipv4.ip_forward=1")
-        self.poison_thread = StoppableThread(
-            target=self.poison)
+
         self.poison_thread.start()
 
-        self.sniff_thread = StoppableThread(
-            target=self.sniffer)
         self.sniff_thread.start()
 
         self.sniff_thread.join()
@@ -103,7 +104,7 @@ class Arper(QtCore.QThread):
         self.output_signal.emit(poison_gateway.summary())
         self.output_signal.emit('-'*40)
         self.output_signal.emit(
-            "[!] Beginning the ARP poison. [CTRL-C to stop]")
+            "[!] Beginning the ARP poison.")
 
         while True:
             if not self.verbose:
@@ -162,8 +163,10 @@ class Arper(QtCore.QThread):
         self.output_signal.emit('[!] Finished...')
         self.kill_signal.emit(True)
 
-        self.poison_thread.stop()
-        self.sniff_thread.stop()
+        if self.poison_thread is not None:
+            self.poison_thread.stop()
+        if self.sniff_thread is not None:
+            self.sniff_thread.stop()
 
 
 if __name__ == '__main__':

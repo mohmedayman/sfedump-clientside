@@ -22,15 +22,17 @@ def setup_mitm_tab(self: QObject,mitm_tab):
         
         button_layout = QHBoxLayout()
         search_button = SearchButton(title="Start")
+        stop_button = SearchButton(title="Stop")
         clear_button = ClearButton()
         
         service = MITMService(self, button=search_button, output=self.res_box)
 
         search_button.clicked.connect(lambda _: service.start(target_input.text(),gateway_input.text()))
-        clear_button.clicked.connect(service.kill)
-        #clear_button.clicked.connect(self.res_box.clear_text)
+        stop_button.clicked.connect(service.kill)
+        clear_button.clicked.connect(self.res_box.clear_text)
         
         button_layout.addWidget(search_button)
+        button_layout.addWidget(stop_button)
         button_layout.addWidget(clear_button)
 
         layout = QVBoxLayout()
