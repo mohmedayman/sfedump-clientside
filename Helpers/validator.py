@@ -30,10 +30,8 @@ class Validator():
 
         return self
     
-    def validate_cpe(self, cpe: Optional[str], nullable: Optional[bool] = False):
-        if nullable and not cpe:
-            return self
-        pattern = r'^cpe:[a-zA-Z0-9_\-\.\:\/]+[aho]:[a-zA-Z0-9_\-\.\/]+:[a-zA-Z0-9_\-\.\/]+$'
+    def validate_cpe(self, cpe: Optional[str]):
+        pattern = r'^cpe:.*$'
         if not re.match(pattern, cpe):
             self.errors.append("Invalid Cpe")
 

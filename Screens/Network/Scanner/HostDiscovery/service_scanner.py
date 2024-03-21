@@ -23,7 +23,7 @@ def setup_service_scanner_tab(self: QObject, service_scanner_tab):
     input_layout = QVBoxLayout()
     target_label = QLabel("Target:")
     target_input = TargetInput()
-    target_input.setPlaceholderText("target")
+    target_input.setPlaceholderText("domain_name")
     input_layout.addWidget(target_label)
     input_layout.addWidget(target_input)
     type_list_label = QLabel("Method:")
