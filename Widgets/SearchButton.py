@@ -1,9 +1,9 @@
 from PyQt5.QtWidgets import QPushButton
 
 class SearchButton(QPushButton):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, title:str = "Search"):
         super().__init__(parent)
-        self.setText("Search")
+        self.setText(title)
         self.setStyleSheet(
             "QPushButton {"
             "   background-color: #6EB5FF;"  # Light blue background color

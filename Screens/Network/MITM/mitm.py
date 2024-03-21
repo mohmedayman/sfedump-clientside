@@ -5,18 +5,17 @@ from Widgets.SearchButton import *
 from Widgets.ClearButton import *
 from Widgets.ResponseBox import *
 from Widgets.TargetInput import *
-from Service.Sniffer import SnifferService
+from Service.MITM import MITMService
 
-def setup_sniffer_tab(self: QObject,sniffer_tab):
+def setup_mitm_tab(self: QObject,mitm_tab):
         
         input_layout = QVBoxLayout()
         gateway_input = TargetInput()
-        gateway_input.setPlaceholderText("Filter Conditions")
+        gateway_input.setPlaceholderText("gateway")
         input_layout.addWidget(gateway_input)
 
         target_input = TargetInput()
-        target_input.setPlaceholderText("Interface")
-        target_input.setText("eth0")
+        target_input.setPlaceholderText("target")
         input_layout.addWidget(target_input)
 
         self.res_box = ResponseBox()
@@ -26,7 +25,7 @@ def setup_sniffer_tab(self: QObject,sniffer_tab):
         stop_button = SearchButton(title="Stop")
         clear_button = ClearButton()
         
-        service = SnifferService(self, button=search_button, output=self.res_box)
+        service = MITMService(self, button=search_button, output=self.res_box)
 
         search_button.clicked.connect(lambda _: service.start(target_input.text(),gateway_input.text()))
         stop_button.clicked.connect(service.kill)
@@ -42,4 +41,4 @@ def setup_sniffer_tab(self: QObject,sniffer_tab):
         layout.addWidget(self.res_box)
 
         # Add the layout to the sniffer tab
-        sniffer_tab.setLayout(layout)
+        mitm_tab.setLayout(layout)

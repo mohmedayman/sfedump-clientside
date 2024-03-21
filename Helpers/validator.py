@@ -19,6 +19,7 @@ class Validator():
             self.errors.append("Invalid Domain")
 
         return self
+
     def ip(self, ip: Optional[str], nullable: Optional[bool] = False):
         if nullable and not ip:
             return self
@@ -45,6 +46,16 @@ class Validator():
         if value not in values:
             self.errors.append(
                 f"value should be one of the following {values}")
+
+        return self
+
+    def string(self, value: Optional[any], nullable: Optional[bool] = False):
+        if nullable and not value:
+            return self
+
+        if not isinstance(value, str):
+            self.errors.append(
+                f"value should be string")
 
         return self
 

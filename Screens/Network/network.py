@@ -3,6 +3,9 @@ from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QTabWidget, QPush
 from Screens.Network.Scanner.scanner import *
 from Screens.Network.Sniffer.sniffer import *
 from Screens.Vulnerability_scanning.vulnerability_scanning import *
+from Screens.Network.Exploiter.exploiter import *
+from Screens.Network.MITM import *
+
 
 def setup_network_tab(parent):
     parent.sub_tabs = QTabWidget()
@@ -24,5 +27,10 @@ def setup_network_tab(parent):
 
     parent.network_tab.setLayout(layout)
     setup_scanning_tab(parent, scanning_tab)
-    setup_sniffer_tab(sniffer_tab)
+
+    setup_sniffer_tab(parent,sniffer_tab)
+    setup_mitm_tab(parent,mitm_tab)
+    setup_exploiter_tab(exploiter_tab)
+
     setup_vulnerability_scanning_tab(parent,vulnerability_scanning_tab)
+
