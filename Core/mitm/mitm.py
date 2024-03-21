@@ -46,7 +46,7 @@ class Arper(QtCore.QThread):
 
     @QtCore.pyqtSlot(str)
     def on_terminate_signal(self, event: str):
-        if event == "terminate":
+        if event == "terminate" and not self.is_terminated:
             self.is_terminated = True
             self.restore()
             self.kill_signal.emit(True)

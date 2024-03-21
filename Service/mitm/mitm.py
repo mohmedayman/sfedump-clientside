@@ -5,13 +5,15 @@ from requests import Response
 from Core.mitm import Arper
 from Widgets import ErrorDialog
 from Helpers import DialogRunnable
+from typing import Callable
 
 
 class MITMService(BaseService):
-    def __init__(self, main: QObject, button: QPushButton, output: QTextEdit) -> None:
+    def __init__(self, main: QObject, button: QPushButton, output: QTextEdit, toggle_fun: Callable) -> None:
         super().__init__(main)
         self.button = button
         self.output = output
+        self.toggle_fun = toggle_fun
 
     def before_request(self):
         self.button.setDisabled(True)
@@ -22,13 +24,12 @@ class MITMService(BaseService):
     def onResponse(self, **kwargs):
         res: Response = kwargs['response']
         self.button.setDisabled(False)
-        print(res)
 
     def start(self, target: str, gateway: str):
         if not (self.validator.ip(target).validate() and self.validator.ip(gateway).validate()):
             return
         self.button.setDisabled(True)
-
+        self.toggle_fun()
         self.worker = Arper(self.main, target, gateway, "eth0", True)
         self.worker.start()
         self.worker.output_signal.connect(self.on_output_signal)
@@ -48,6 +49,7 @@ class MITMService(BaseService):
             self.worker.quit()
             self.worker.exit()
             self.worker.terminate()
+            self.toggle_fun(False)
             self.button.setDisabled(False)
 
     @pyqtSlot(str)

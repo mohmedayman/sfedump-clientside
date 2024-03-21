@@ -5,13 +5,14 @@ from requests import Response
 from Core.sniffer import NetworkSniffer
 from Widgets import ErrorDialog
 from Helpers import DialogRunnable
-
+from typing import Callable
 
 class SnifferService(BaseService):
-    def __init__(self, main: QObject, button: QPushButton, output: QTextEdit) -> None:
+    def __init__(self, main: QObject, button: QPushButton, output: QTextEdit, toggle_fun:Callable) -> None:
         super().__init__(main)
         self.button = button
         self.output = output
+        self.toggle_fun = toggle_fun
 
     def before_request(self):
         self.button.setDisabled(True)
@@ -30,6 +31,7 @@ class SnifferService(BaseService):
         self.button.setDisabled(True)
 
         self.worker = NetworkSniffer(self.main, interface, filter)
+        self.toggle_fun()
         self.worker.start()
         self.worker.output_signal.connect(self.on_output_signal)
         self.worker.error_signal.connect(self.on_error_signal)
@@ -48,6 +50,7 @@ class SnifferService(BaseService):
             self.worker.quit()
             self.worker.exit()
             self.worker.terminate()
+            self.toggle_fun(False)
             self.button.setDisabled(False)
 
     @pyqtSlot(str)
