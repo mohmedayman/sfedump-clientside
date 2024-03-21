@@ -3,7 +3,7 @@ import validators as validators
 from Helpers import DialogRunnable
 from PyQt5.QtCore import QThreadPool, QObject
 from Widgets import ErrorDialog
-
+import re
 
 class Validator():
     def __init__(self, parent):
@@ -26,6 +26,15 @@ class Validator():
         val = validators.ipv4(ip)
         if not val:
             self.errors.append("Invalid IP-address")
+
+        return self
+    
+    def validate_cpe(self, cpe: Optional[str], nullable: Optional[bool] = False):
+        if nullable and not cpe:
+            return self
+        pattern = r'^cpe:[a-zA-Z0-9_\-\.\:\/]+[aho]:[a-zA-Z0-9_\-\.\/]+:[a-zA-Z0-9_\-\.\/]+$'
+        if not re.match(pattern, cpe):
+            self.errors.append("Invalid Cpe")
 
         return self
 

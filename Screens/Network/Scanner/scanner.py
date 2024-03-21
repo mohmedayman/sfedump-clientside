@@ -1,18 +1,34 @@
+<<<<<<< Updated upstream:Screens/Network/Scanner/scanner.py
 from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QTabWidget, QPushButton
 from Screens.Network.Scanner.HostDiscovery.host_discovery import *
+=======
+from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QTabWidget,QWidget
+>>>>>>> Stashed changes:Screens/Scanner/scanner.py
 from PyQt5.QtCore import Qt, QObject
+from Service import DNS
+from Widgets.SearchButton import *
+from Widgets.ClearButton import *
+from Widgets.ResponseBox import *
+from Widgets.TargetInput import *
+from Screens.Scanner.HostDiscovery.ip_scanner import *
+from Screens.Scanner.HostDiscovery.port_scanner import *
+from Screens.Scanner.HostDiscovery.service_scanner import *
+from Screens.Scanner.HostDiscovery.footprinting import *
 
-
-def setup_scanning_tab(self: QObject,scanning_tab):
-        # Create sub-tabs for scanning
+def setup_scanning_tab(self: QObject, host_discovery_tab):
+     # Create sub-tabs for scanning
         self.sub_tabs = QTabWidget()
 
-        host_discovery_tab = QWidget()
-        port_scanning_tab = QWidget()
+        ip_scanner_tab = QWidget()
+        port_scanner_tab = QWidget()
+        service_scanner_tab = QWidget()
+        footprinting_tab = QWidget()
         enumeration_tab = QWidget()
 
-        self.sub_tabs.addTab(host_discovery_tab, "Host Discovery")
-        self.sub_tabs.addTab(port_scanning_tab, "Port Scanning")
+        self.sub_tabs.addTab(ip_scanner_tab, "Ip scanner")
+        self.sub_tabs.addTab(port_scanner_tab, "Port Scanner")
+        self.sub_tabs.addTab(service_scanner_tab, "Service scanner")
+        self.sub_tabs.addTab(footprinting_tab, "Footprinting")
         self.sub_tabs.addTab(enumeration_tab, "Enumeration")
 
        
@@ -22,9 +38,9 @@ def setup_scanning_tab(self: QObject,scanning_tab):
         layout.addWidget(self.sub_tabs)
         
 
-        scanning_tab.setLayout(layout)
-        setup_host_discovery_tab(scanning_tab,host_discovery_tab)
-def setup_port_scanning_tab():
-        pass
-def setup_enumeration_tab():
-        pass
+        host_discovery_tab.setLayout(layout)
+        setup_ip_scanner_tab(host_discovery_tab,ip_scanner_tab)
+        setup_port_scanner_tab(host_discovery_tab,port_scanner_tab)
+        setup_service_scanner_tab(host_discovery_tab,service_scanner_tab)
+        setup_footprinting_tab(host_discovery_tab,footprinting_tab)
+        
