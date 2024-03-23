@@ -7,8 +7,17 @@ from Widgets.ResponseBox import *
 from Widgets.TargetInput import *
 from Widgets.StopButton import *
 from Service.Sniffer import SnifferService
+from typing import Optional
 
 def setup_sniffer_tab(self: QObject, sniffer_tab):
+        def toggle_buttons(force_stop:Optional[bool] = None):
+            
+            search_button.setVisible(not search_button.isVisible())
+            stop_button.setVisible(not stop_button.isVisible())
+
+            if force_stop is not None:    
+                    search_button.setVisible(not force_stop)
+                    stop_button.setVisible(force_stop)
         
         input_layout = QVBoxLayout()
         gateway_label = QLabel("Filter Conditions:")
@@ -30,14 +39,11 @@ def setup_sniffer_tab(self: QObject, sniffer_tab):
         stop_button = StopButton(title="Stop")
         clear_button = ClearButton()
         
-        service = SnifferService(self, button=search_button, output=self.res_box)
+        service = SnifferService(self, button=search_button, output=self.res_box, toggle_fun = toggle_buttons)
 
-        def toggle_buttons():
-            search_button.setVisible(not search_button.isVisible())
-            stop_button.setVisible(not stop_button.isVisible())
 
-        search_button.clicked.connect(lambda _: (service.start(target_input.text(), gateway_input.text()), toggle_buttons()))
-        stop_button.clicked.connect(lambda: (service.kill(), toggle_buttons()))
+        search_button.clicked.connect(lambda _: service.start(target_input.text(), gateway_input.text()))
+        stop_button.clicked.connect(lambda: service.kill())
         clear_button.clicked.connect(self.res_box.clear_text)
         
         button_layout.addWidget(search_button)
