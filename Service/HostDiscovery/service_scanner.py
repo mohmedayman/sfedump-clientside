@@ -1,7 +1,11 @@
 from Service import BaseService
-from PyQt5.QtWidgets import QPushButton, QLineEdit,QTextEdit
+from PyQt5.QtWidgets import QPushButton, QLineEdit, QTextEdit
 from PyQt5.QtCore import QObject
 from requests import Response
+from Core.host_discovery import service_scanner
+from PyQt5.QtCore import QRunnable, QThread, QMetaObject, Q_ARG, Qt, QProcess
+from PyQt5.QtCore import pyqtSlot, QThreadPool, QObject
+from Options.host_discovery import ServiceScannerEnum
 
 
 class ServiceScannerService(BaseService):
@@ -16,28 +20,34 @@ class ServiceScannerService(BaseService):
     def onError(self):
         self.button.setDisabled(False)
 
-    def onResponse(self, **kwargs):
-        res: Response = kwargs['response']
+    @pyqtSlot(dict)
+    def onResponse(self, data):
+        self.spinner.stop()
         self.button.setDisabled(False)
-        data = res.json()['data']
+
         formatted_data = ""
-        formatted_data=self.format_data(data,formatted_data)
+        formatted_data = self.format_data(data, formatted_data)
         self.output.setText(formatted_data)
 
-    def service_scanner(self, target: str,type: str):
+    def service_scanner(self, target: str, type: str):
 
-        if self.validator.domain(target).validate():
-            self.request("get", "/host-discover/service-scanner",
-                         params={"target": target,"method":type})
-            
-    def format_data(self,data,formatted_data):
+        if not self.validator.target(target).isin(type, [e.value for e in ServiceScannerEnum]).validate():
+            return
+
+        self.before_request()
+        self.spinner.start()
+        runnable = Runnable(self, target, int(ServiceScannerEnum[type]))
+        QThreadPool.globalInstance().start(runnable)
+
+    def format_data(self, data, formatted_data):
         if data["os"]:
             formatted_data += "[Operating System Information]:\n"
             for os_info in data["os"]:
                 for key, value in os_info.items():
                     formatted_data += f"{key}: {value}\n"
                 formatted_data += "\n"
-        else: formatted_data += "[Operating System Information]:(empty)\n"
+        else:
+            formatted_data += "[Operating System Information]:(empty)\n"
         # Format port information
         if data["ports"]:
             formatted_data += "\n[Ports Information]:\n"
@@ -50,8 +60,25 @@ class ServiceScannerService(BaseService):
                 for vulnerability in port_info['vulnerabilities']:
                     formatted_data += f"- {vulnerability}\n"
                 formatted_data += "\n"
-        
-        else: formatted_data += "\n[Ports Information]:(empty)\n"
+
+        else:
+            formatted_data += "\n[Ports Information]:(empty)\n"
 
         return formatted_data
 
+
+class Runnable(QRunnable):
+    def __init__(self, main, target, type):
+        QRunnable.__init__(self)
+        self.main = main
+        self.type = type
+        self.target = target
+
+    def run(self):
+
+        r = service_scanner(self.target, self.type)
+
+        QThread.msleep(1000)
+        QMetaObject.invokeMethod(self.main, "onResponse",
+                                 Qt.QueuedConnection,
+                                 Q_ARG(dict, r))

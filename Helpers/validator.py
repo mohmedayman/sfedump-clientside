@@ -4,6 +4,9 @@ from Helpers import DialogRunnable
 from PyQt5.QtCore import QThreadPool, QObject
 from Widgets import ErrorDialog
 import re
+import ipaddress
+import socket
+
 
 class Validator():
     def __init__(self, parent):
@@ -29,13 +32,36 @@ class Validator():
             self.errors.append("Invalid IP-address")
 
         return self
-    
+
     def validate_cpe(self, cpe: Optional[str]):
         pattern = r'^cpe:.*$'
         if not re.match(pattern, cpe):
             self.errors.append("Invalid Cpe")
 
         return self
+
+    def subnet(self, subnet, nullable: Optional[bool] = False):
+        try:
+            ipaddress.IPv4Network(subnet)
+            return self
+        except ValueError:
+            self.errors.append("Invalid Subnet")
+
+            return self
+
+    def target(self, target, nullable: Optional[bool] = False):
+        try:
+            if validators.domain(target) or validators.ipv4(target) or ipaddress.IPv4Network(target):
+                return self
+
+            self.errors.append("Invalid target")
+            return self
+        except socket.error:
+            self.errors.append("Invalid target")
+            return self
+        except ValueError:
+            self.errors.append("Invalid target")
+            return self
 
     def isin(self, value: Optional[any], values: List, nullable: Optional[bool] = False):
         if nullable and not value:

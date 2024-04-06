@@ -6,6 +6,7 @@ from Widgets.ClearButton import *
 from Widgets.ResponseBox import *
 from Widgets.TargetInput import *
 from Widgets.SendButton import *
+from Options.host_discovery import PortScannerEnum
 
 def setup_port_scanner_tab(self: QObject, port_scanner_tab):
     def onPortListTypeChanged(index):
@@ -49,7 +50,7 @@ def setup_port_scanner_tab(self: QObject, port_scanner_tab):
     type_list_label = QLabel("Scanner type:")
     type_list=QComboBox()
     type_list.setFixedHeight(30)
-    options=["connect","SYN","UDP","ACK","FIN","XMAS"]
+    options=[e.value for e in PortScannerEnum]
     #type_list.currentIndexChanged.connect()
     type_list.addItems(options)
     type_list_label2 = QLabel("Port list type:")
