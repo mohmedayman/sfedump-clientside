@@ -1,13 +1,13 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout,QHBoxLayout, QLabel, QPushButton, QTextEdit,QTableWidget, QTableWidgetItem, QComboBox,QMessageBox,QLineEdit,QCheckBox,QListWidget,QFileDialog
-
+from Screens.Repeater.repeater import RepeaterTab
 def createNavBar(parent):
     # Create tabs
         parent.dashboard_tab = QWidget()
         parent.proxy_tab = QWidget()
         parent.target_tab = QWidget()
         parent.intruder_tab = QWidget()
-        parent.repeater_tab = QWidget()
+        parent.repeater_tab = RepeaterTab()
         #parent.sequencer_tab = QWidget()
         parent.decoder_tab = QWidget()
         #parent.comparer_tab = QWidget()
