@@ -10,6 +10,7 @@ from Screens.Decoder.decoder import *
 from Screens.Comparer.comparer import *
 from Screens.Extender.extender import *
 from Screens.Network.network import *
+from Screens.Web_vulnerability.Web_vulnerability import *
 from Screens.DNS.dns import *
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QTextEdit, QTableWidget, QTableWidgetItem, QComboBox, QMessageBox, QLineEdit, QCheckBox, QListWidget, QFileDialog
 from PyQt5.QtGui import QIcon
@@ -37,7 +38,7 @@ class MainApp(QMainWindow):
 
         # Add content to tabs
         setup_proxy_tab(self)
-        setup_target_tab(self)
+        # setup_target_tab(self)
         # setup_sequencer_tab(self)
         setup_decoder_tab(self)
         setup_intruder_tab(self)
@@ -47,6 +48,7 @@ class MainApp(QMainWindow):
         # setup_scanning_tab(self)
         # setup_sniffer_tab(self)
         # setup_exploiter_tab(self)
+        setup_web_vulnerability_tab(self)
         setup_network_tab(self)
         setup_dashboard_tab(self)
         setup_dns_tab(self)
