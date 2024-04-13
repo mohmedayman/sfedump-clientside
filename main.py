@@ -22,8 +22,8 @@ class MainApp(QMainWindow):
 
         self.setWindowTitle("Penteration testing platform")
 
-        self.setGeometry(300, 80, 1000, 900)
-        self.setWindowIcon(QIcon("assets/imgs/icon.jpeg"))
+        self.setGeometry(100, 100, 800, 600)
+        self.setWindowIcon(QIcon("assets/images/icon.jpeg"))
         main_widget = QWidget()
         self.setCentralWidget(main_widget)
 

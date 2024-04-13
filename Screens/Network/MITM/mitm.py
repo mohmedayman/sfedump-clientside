@@ -6,7 +6,7 @@ from Widgets.ClearButton import *
 from Widgets.ResponseBox import *
 from Widgets.TargetInput import *
 from Widgets.StopButton import *
-from Service.MITM import MITMService
+from Service.mitm import MITMService
 from typing import Optional
 
 

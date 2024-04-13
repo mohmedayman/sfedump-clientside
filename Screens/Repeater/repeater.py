@@ -5,7 +5,9 @@ from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, QTextEdit,
     QPushButton, QPlainTextEdit, QFileDialog, QMessageBox, QDialog, QWidget, QInputDialog
 )
-from PyQt5.QtGui import QTextCursor
+from PyQt5.QtGui import QTextCursor, QTextCharFormat
+import webbrowser
+from bs4 import BeautifulSoup
 from urllib.parse import urlsplit, urlunsplit
 from Widgets.InputBox import *
 from Widgets.ResponseBox import *
@@ -108,8 +110,14 @@ class RepeaterTab(QWidget):
         self.response_text.clear()
         self.response_text.insertPlainText(
             f"HTTP/{response.raw.version} {response.status_code} {response.reason}\n")
-        self.response_text.insertPlainText(f"{response.headers}\n\n")
+        
+        # Display headers as key-value pairs
+        for key, value in response.headers.items():
+            self.response_text.insertPlainText(f"\"{key}\": {value}\n")
+        
+        self.response_text.insertPlainText("\n")
         self.response_text.insertPlainText(response.text)
+
 
 #     def modify_request(self):
 #         self.request_text.setReadOnly(False)
@@ -139,6 +147,7 @@ class RepeaterTab(QWidget):
         response_text = self.response_text.toPlainText()
         with open("response.html", "w") as f:
             f.write(response_text)
+        webbrowser.open("response.html")
         # No webbrowser.open() used
 
     def pretty_print_response(self):
@@ -233,27 +242,28 @@ class RepeaterTab(QWidget):
 
         return python_code
 
+
     def search_response(self):
-        text_to_find, ok = QInputDialog.getText(
-            self, "Search", "Enter text to find in the response:")
+        text_to_find, ok = QInputDialog.getText(self, "Search", "Enter text to find in the response:")
         if ok:
             text_to_find = str(text_to_find)
             if text_to_find:
-                cursor = self.response_text.textCursor()
-                found = False
-                while cursor.hasSelection():
-                    cursor.movePosition(
-                        QTextCursor.NextWord, QTextCursor.KeepAnchor)
-                    if text_to_find in cursor.selectedText():
-                        found = True
+                response_text = self.response_text.toPlainText()
+                if text_to_find in response_text:
+                    cursor = QTextCursor(self.response_text.document())
+                    found = cursor.document().find(text_to_find)
+                    if found:
+                        cursor.setPosition(found.position())
+                        cursor.movePosition(QTextCursor.Left, QTextCursor.KeepAnchor, len(text_to_find))
                         self.response_text.setTextCursor(cursor)
                         self.response_text.ensureCursorVisible()
-                        QMessageBox.information(
-                            self, "Search", f"Text found: {text_to_find}")
-                        break
-                if not found:
-                    QMessageBox.information(
-                        self, "Search", f"Text not found: {text_to_find}")
+                        self.response_text.setFocus(Qt.OtherFocusReason)  # Set focus back to the QTextEdit
+                        QMessageBox.information(self, "Search", f"Text found: {text_to_find}")
+                    else:
+                        QMessageBox.information(self, "Search", f"Text not found: {text_to_find}")
+                else:
+                    QMessageBox.information(self, "Search", f"Text not found: {text_to_find}")
+
 
 
 class Runnable(QRunnable):
