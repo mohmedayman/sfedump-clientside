@@ -7,7 +7,9 @@ PyQt5==5.15.10
 PyQt5-Qt5==5.15.2
 PyQt5-sip==12.13.0
 pyqtspinner==2.0.0
+python3-nmap==1.6.0
 requests==2.31.0
+scapy==2.5.0
+simplejson==3.19.2
 urllib3==2.2.0
 validators==0.22.0
-scapy==2.5.0

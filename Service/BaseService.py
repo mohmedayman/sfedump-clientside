@@ -1,7 +1,7 @@
 
 
 from abc import abstractmethod
-from Helpers import API,Validator,RequestRunnable, DialogRunnable
+from Helpers import API, Validator, RequestRunnable, DialogRunnable
 from pyqtspinner import WaitingSpinner
 from PyQt5.QtCore import pyqtSlot, QThreadPool, QObject
 from requests import Response
@@ -41,12 +41,16 @@ class BaseService(QObject):
     def setResponse(self, data: Response):
         self.spinner.stop()
         if not data.ok:
-            json = data.json()
+            try:
+                json = data.json()
+            except:
+
+                json = {"errors": [{"message": "Something Wrong Happened"}]}
             dlg = ErrorDialog(json.get(
                 'detail', 'Error Occurred'), json.get('errors', {}))
             runnable = DialogRunnable(self, dlg)
             QThreadPool.globalInstance().start(runnable)
-            
+
             self.onError()
 
         else:

@@ -5,6 +5,8 @@ from Widgets.SearchButton import *
 from Widgets.ClearButton import *
 from Widgets.ResponseBox import *
 from Widgets.TargetInput import *
+from Options.host_discovery import IPScannerEnum
+
 
 def setup_ip_scanner_tab(self: QObject, ip_scanner_tab):
     button_layout = QHBoxLayout()
@@ -29,7 +31,7 @@ def setup_ip_scanner_tab(self: QObject, ip_scanner_tab):
     type_list_label = QLabel("Type:")
     type_list=QComboBox()
     type_list.setFixedHeight(30)
-    options=["arp","icmp","no_dns"]
+    options=[e.value for e in IPScannerEnum]
     #type_list.currentIndexChanged.connect()
     type_list.addItems(options)
     input_layout.addWidget(type_list_label)

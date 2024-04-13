@@ -5,6 +5,7 @@ from Widgets.SearchButton import *
 from Widgets.ClearButton import *
 from Widgets.ResponseBox import *
 from Widgets.TargetInput import *
+from Options.host_discovery import ServiceScannerEnum
 
 def setup_service_scanner_tab(self: QObject, service_scanner_tab):
     button_layout = QHBoxLayout()
@@ -29,7 +30,7 @@ def setup_service_scanner_tab(self: QObject, service_scanner_tab):
     type_list_label = QLabel("Method:")
     type_list=QComboBox()
     type_list.setFixedHeight(30)
-    options=["service","vulnerability","os","aggressive"]
+    options=[e.value for e in ServiceScannerEnum]
     #type_list.currentIndexChanged.connect()
     type_list.addItems(options)
     input_layout.addWidget(type_list_label)
