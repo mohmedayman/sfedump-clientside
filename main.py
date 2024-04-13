@@ -41,7 +41,7 @@ class MainApp(QMainWindow):
         # setup_sequencer_tab(self)
         setup_decoder_tab(self)
         setup_intruder_tab(self)
-        setup_repeater_tab(self)
+        # setup_repeater_tab()
         # setup_comparer_tab(self)
         setup_extender_tab(self)
         # setup_scanning_tab(self)
