@@ -15,7 +15,7 @@ from Widgets.SendButton import *
 from Widgets.FunctionalButton import *
 from PyQt5.QtCore import QRunnable, QThread, QMetaObject, Q_ARG, Qt, QProcess
 from PyQt5.QtCore import pyqtSlot, QThreadPool, QObject
-
+from Screens.http_request_parser import HTTPRequestParser
 
 class RepeaterTab(QWidget):
     def __init__(self):
@@ -39,9 +39,6 @@ class RepeaterTab(QWidget):
         self.send_button = SendButton("Send Request")
         self.send_button.clicked.connect(self.send_request)
         button_layout.addWidget(self.send_button)
-        # self.modify_button = QPushButton("Modify Request")
-        # self.modify_button.clicked.connect(self.modify_request)
-        # button_layout.addWidget(self.modify_button)
         layout.addLayout(button_layout)
 
         # Response section
@@ -80,26 +77,33 @@ class RepeaterTab(QWidget):
 
     def send_request(self):
         raw_request = self.request_text.toPlainText()
-        method = self.get_method(raw_request)
+        parser = HTTPRequestParser()
+
+        url = parser.extract_url(raw_request)
+        method = self.get_method(raw_request).upper()
+        data = parser.extract_data(raw_request)
+        parameters = parser.extract_parameters(raw_request)
+        headers = parser.parse_raw_headers(raw_request)
+
+        if not url:
+            QMessageBox.information(self, "Send Request", "Invalid URL in the request.")
+            return
+
         try:
             if method == "GET":
-                url = self.extract_url(raw_request)
                 response = requests.get
-                runnable = Runnable(self, response, url)
+                runnable = Runnable(self, response, url, headers=headers, params=parameters)
                 QThreadPool.globalInstance().start(runnable)
             elif method == "POST":
                 url = self.extract_url(raw_request)
                 data = self.extract_data(raw_request)
-                response = requests.post
-                runnable = Runnable(self, response, url, data=data)
-                QThreadPool.globalInstance().start(runnable)
-                return
-            else:
-                QMessageBox.information(
-                    self, "Send Request", "Unsupported HTTP method.")
-                return
 
-            # self.display_response(response)
+                response = requests.post
+                runnable = Runnable(self, response, url, headers=headers, data=data, params=parameters)
+                QThreadPool.globalInstance().start(runnable)
+            else:
+                QMessageBox.information(self, "Send Request", "Unsupported HTTP method.")
+                return
         except requests.exceptions.RequestException as e:
             self.response_text.clear()
             self.response_text.insertPlainText(f"Error: {e}")
@@ -117,18 +121,13 @@ class RepeaterTab(QWidget):
         self.response_text.insertPlainText("\n")
         self.response_text.insertPlainText(response.text)
 
-
-#     def modify_request(self):
-#         self.request_text.setReadOnly(False)
-#         self.request_text.setFocus()
-
     def copy_as_url(self):
         raw_request = self.request_text.toPlainText()
-        url = self.extract_url(raw_request)
+        parser = HTTPRequestParser()
+        url = parser.extract_url(raw_request)
         if url:
             QApplication.clipboard().setText(url)
-            QMessageBox.information(
-                self, "Copy as URL", f"URL copied to clipboard:\n{url}")
+            QMessageBox.information(self, "Copy as URL", f"URL copied to clipboard:\n{url}")
 
     def toggle_method(self):
         raw_request = self.request_text.toPlainText()
@@ -139,8 +138,7 @@ class RepeaterTab(QWidget):
         raw_request = self.request_text.toPlainText()
         python_request = self.convert_to_python_request(raw_request)
         QApplication.clipboard().setText(python_request)
-        QMessageBox.information(
-            self, "Copy as Python Request", "Python request script copied to clipboard.")
+        QMessageBox.information(self, "Copy as Python Request", "Python request script copied to clipboard.")
 
     def render_response(self):
         response_text = self.response_text.toPlainText()
@@ -156,8 +154,7 @@ class RepeaterTab(QWidget):
             self.response_text.clear()
             self.response_text.insertPlainText(pretty_response)
         except json.JSONDecodeError:
-            QMessageBox.information(
-                self, "Pretty Print", "Response is not in JSON format.")
+            QMessageBox.information(self, "Pretty Print", "Response is not in JSON format.")
 
     def toggle_http_method(self, raw_request):
         lines = raw_request.split("\n")
@@ -174,95 +171,27 @@ class RepeaterTab(QWidget):
         first_line_parts = lines[0].split()
         return first_line_parts[0] if first_line_parts else "GET"
 
-    def extract_url(self, raw_request):
-        lines = raw_request.split("\n")
-        first_line_parts = lines[0].split()
-        if len(first_line_parts) >= 2:
-            method, path = first_line_parts[0], first_line_parts[1]
-            host = None
-            for line in lines[1:]:
-                if line.lower().startswith("host:"):
-                    host = line.split(":", 1)[1].strip()
-                    break
-            if host:
-                scheme = "https" if "https://" in path else "http"
-                url = urlunsplit((scheme, host, path, "", ""))
-                return url
-        return None
-
-    def extract_data(self, raw_request):
-        lines = raw_request.split("\n")
-        data_line = None
-        for line in lines[1:]:
-            if line.lower().startswith("content-type: application/x-www-form-urlencoded"):
-
-                data_line = line
-                break
-        if data_line:
-            return data_line.split(":", 1)[1].strip()
-
-        return None
-
-    def parse_raw_headers(self, raw_request):
-        headers = {}
-        lines = raw_request.split("\n")
-        for line in lines[1:]:
-            if not line.strip():
-                break  # Stop when an empty line is encountered
-            key, value = line.split(":", 1)
-            headers[key.strip()] = value.strip()
-        return headers
-
     def convert_to_python_request(self, raw_request):
-        lines = raw_request.split('\n')
-        method, url, *_ = lines[0].split()
-        headers = {}
-        data = None
+        parser = HTTPRequestParser()
+        url = parser.extract_url(raw_request)
+        method = self.get_method(raw_request).upper()
+        headers = parser.parse_raw_headers(raw_request)
+        data = parser.extract_data(raw_request)
 
-        # Parse headers and data
-        for line in lines[1:]:
-            if not line.strip():
-                break
-            key, value = line.split(':', 1)
-            headers[key.strip()] = value.strip()
-        if method == 'POST':
-            data = lines[-1]
-
-        # Format into Python code snippet
         python_code = f"import requests\n\n"
         python_code += f"url = '{url}'\n"
-        python_code += f"headers = {headers}\n"
+        python_code += f"headers = {json.dumps(headers, indent=4)}\n"
         if data:
-            python_code += f"data = '{data}'\n"
+            python_code += f"data = {json.dumps(data)}\n"
         else:
             python_code += f"data = None\n"
         python_code += f"response = requests.{method.lower()}(url, headers=headers, data=data)\n"
         python_code += f"print(response.text)"
 
         return python_code
-
-
+    
     def search_response(self):
-        text_to_find, ok = QInputDialog.getText(self, "Search", "Enter text to find in the response:")
-        if ok:
-            text_to_find = str(text_to_find)
-            if text_to_find:
-                response_text = self.response_text.toPlainText()
-                if text_to_find in response_text:
-                    cursor = QTextCursor(self.response_text.document())
-                    found = cursor.document().find(text_to_find)
-                    if found:
-                        cursor.setPosition(found.position())
-                        cursor.movePosition(QTextCursor.Left, QTextCursor.KeepAnchor, len(text_to_find))
-                        self.response_text.setTextCursor(cursor)
-                        self.response_text.ensureCursorVisible()
-                        self.response_text.setFocus(Qt.OtherFocusReason)  # Set focus back to the QTextEdit
-                        QMessageBox.information(self, "Search", f"Text found: {text_to_find}")
-                    else:
-                        QMessageBox.information(self, "Search", f"Text not found: {text_to_find}")
-                else:
-                    QMessageBox.information(self, "Search", f"Text not found: {text_to_find}")
-
+        self.response_text.search_response(self)
 
 
 class Runnable(QRunnable):
