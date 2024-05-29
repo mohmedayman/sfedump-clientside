@@ -1,3 +1,3 @@
 from .ErrorDialog import ErrorDialog
-
-__all__ = ["ErrorDialog"]
+from .CollapsibleBox import CollapsibleBox
+__all__ = ["ErrorDialog","CollapsibleBox"]
