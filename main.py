@@ -20,19 +20,30 @@ class MainApp(QMainWindow):
     def __init__(self, app):
         super().__init__()
         self.app = app
+        self.scroll = QtWidgets.QScrollArea()             # Scroll Area which contains the widgets, set as the centralWidget
+        self.widget = QWidget()                 # Widget that contains the collection of Vertical Box
+        self.vbox = QVBoxLayout()
 
         self.setWindowTitle("Penteration testing platform")
 
-        self.setGeometry(100, 100, 800, 600)
+        self.setGeometry(100, 100, 1200, 850)
         self.setWindowIcon(QIcon("assets/images/icon.jpeg"))
         main_widget = QWidget()
         self.setCentralWidget(main_widget)
 
         # Create a tab widget
         self.tabs = QTabWidget()
-        main_layout = QVBoxLayout()
-        main_layout.addWidget(self.tabs)
-        main_widget.setLayout(main_layout)
+        #main_layout = QVBoxLayout()
+        self.vbox.addWidget(self.tabs)
+        self.widget.setLayout(self.vbox)
+
+        #Scroll Area Properties
+        self.scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scroll.setWidgetResizable(True)
+        self.scroll.setWidget(self.widget)
+
+        self.setCentralWidget(self.scroll)
 
         createNavBar(self)
 

@@ -95,6 +95,9 @@ class RepeaterTab(QWidget):
                 runnable = Runnable(self, response, url, headers=headers, params=parameters)
                 QThreadPool.globalInstance().start(runnable)
             elif method == "POST":
+                url = self.extract_url(raw_request)
+                data = self.extract_data(raw_request)
+
                 response = requests.post
                 runnable = Runnable(self, response, url, headers=headers, data=data, params=parameters)
                 QThreadPool.globalInstance().start(runnable)
