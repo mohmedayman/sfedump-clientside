@@ -7,6 +7,7 @@ from Widgets.ResponseBox import *
 from Widgets.SendButton import *
 from Widgets.FunctionalButton import *
 from Widgets.TargetInput import *
+import itertools
 from urllib.parse import urlunsplit, urlparse, parse_qs
 from Screens.http_request_parser import HTTPRequestParser
 
@@ -22,7 +23,7 @@ class SniperTab(QWidget):
         layout.addWidget(self.raw_request_label)
 
         self.raw_request_text = InputBox()
-        self.raw_request_text.setPlaceholderText("HTTP Request")
+        self.raw_request_text.setPlaceholderText("Enter HTTP request here with $value$ placeholder...")
         layout.addWidget(self.raw_request_text)
 
         self.payload_label = QLabel("Payloads (comma separated):")
@@ -32,10 +33,16 @@ class SniperTab(QWidget):
         self.payload_text.setPlaceholderText("payloads")
         layout.addWidget(self.payload_text)
 
+        hbox1=QHBoxLayout()
         self.load_payload_button = FunctionalButton()
-        self.load_payload_button.setText("Load playload")
+        self.load_payload_button.setText("Load payload")
         self.load_payload_button.clicked.connect(self.load_payload)
-        layout.addWidget(self.load_payload_button)
+        hbox1.addWidget(self.load_payload_button)
+        self.generate_payload_button = FunctionalButton()
+        self.generate_payload_button.setText("Generate Payload")
+        self.generate_payload_button.clicked.connect(self.generate_payload1)
+        hbox1.addWidget(self.generate_payload_button)
+        layout.addLayout(hbox1)
 
         self.sniper_button = SendButton()
         self.sniper_button.setText("Run sniper attack")
@@ -63,6 +70,31 @@ class SniperTab(QWidget):
             with open(file_name, 'r') as file:
                 self.payload_values = file.readlines()
             self.payload_text.setPlainText(",".join([value.strip() for value in self.payload_values]))
+
+    def generate_payload1(self):
+        min_length, max_length, char_set = self.get_payload_parameters()
+        if min_length and max_length and char_set:
+            self.payload_values = self.generate_passwords(min_length, max_length, char_set)
+            self.payload_text.setPlainText(",".join(self.payload_values))
+
+    def get_payload_parameters(self):
+        min_length, ok = QInputDialog.getInt(self, "Input", "Enter the minimum length of the password:")
+        if not ok:
+            return None, None, None
+        max_length, ok = QInputDialog.getInt(self, "Input", "Enter the maximum length of the password:")
+        if not ok:
+            return None, None, None
+        char_set, ok = QInputDialog.getText(self, "Input", "Enter the character set (e.g., abcdefghijklmnopqrstuvwxyz0123456789):")
+        if not ok:
+            return None, None, None
+        return min_length, max_length, char_set
+
+    def generate_passwords(self, min_length, max_length, char_set):
+        passwords = []
+        for length in range(min_length, max_length + 1):
+            for combination in itertools.product(char_set, repeat=length):
+                passwords.append(''.join(combination))
+        return passwords
 
     def run_sniper_attack(self):
         raw_request = self.raw_request_text.toPlainText()

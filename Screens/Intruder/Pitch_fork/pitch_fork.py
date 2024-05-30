@@ -11,12 +11,12 @@ import itertools
 from urllib.parse import urlunsplit, urlparse, parse_qs
 from Screens.http_request_parser import HTTPRequestParser
 
-class ClasterBombTab(QWidget):
+class PitchForkTab(QWidget):
     def __init__(self):
         super().__init__()
-        self.setup_ClasterBomb_tab()
+        self.setup_PitchFork_tab()
 
-    def setup_ClasterBomb_tab(self):
+    def setup_PitchFork_tab(self):
         layout = QVBoxLayout()
 
         self.raw_request_label = QLabel("Enter HTTP Request:")
@@ -62,10 +62,10 @@ class ClasterBombTab(QWidget):
         hbox2.addWidget(self.generate_payload2_button)
         layout.addLayout(hbox2)
 
-        self.ClasterBomb_button = SendButton()
-        self.ClasterBomb_button.setText("Run ClasterBomb attack")
-        self.ClasterBomb_button.clicked.connect(self.run_ClasterBomb_attack)
-        layout.addWidget(self.ClasterBomb_button)
+        self.PitchFork_button = SendButton()
+        self.PitchFork_button.setText("Run PitchFork attack")
+        self.PitchFork_button.clicked.connect(self.run_PitchFork_attack)
+        layout.addWidget(self.PitchFork_button)
 
         # Response section
         self.response_label = QLabel("Response:")
@@ -86,16 +86,16 @@ class ClasterBombTab(QWidget):
         file_name, _ = QFileDialog.getOpenFileName(self, "Load Payload1", "", "Text Files (*.txt);;All Files (*)", options=options)
         if file_name:
             with open(file_name, 'r') as file:
-                self.payload1_values = file.readlines()
-            self.payload1_text.setPlainText(",".join([value.strip() for value in self.payload1_values]))
+                self.payload1_values = [line.strip() for line in file.readlines()]
+            self.payload1_text.setPlainText(",".join(self.payload1_values))
 
     def load_payload2(self):
         options = QFileDialog.Options()
         file_name, _ = QFileDialog.getOpenFileName(self, "Load Payload2", "", "Text Files (*.txt);;All Files (*)", options=options)
         if file_name:
             with open(file_name, 'r') as file:
-                self.payload2_values = file.readlines()
-            self.payload2_text.setPlainText(",".join([value.strip() for value in self.payload2_values]))
+                self.payload2_values = [line.strip() for line in file.readlines()]
+            self.payload2_text.setPlainText(",".join(self.payload2_values))
 
     def generate_payload1(self):
         min_length, max_length, char_set = self.get_payload_parameters()
@@ -128,7 +128,7 @@ class ClasterBombTab(QWidget):
                 passwords.append(''.join(combination))
         return passwords
 
-    def run_ClasterBomb_attack(self):
+    def run_PitchFork_attack(self):
         raw_request = self.raw_request_text.toPlainText()
         # payload_values = self.payload_text.toPlainText().split(',')
         if not raw_request:
@@ -139,33 +139,29 @@ class ClasterBombTab(QWidget):
             QMessageBox.warning(self, "Error", "Please load or generate both payload 1 and payload 2 files.")
             return
 
+        max_length = max(len(self.payload1_values), len(self.payload2_values))
+        self.payload1_values += [""] * (max_length - len(self.payload1_values))
+        self.payload2_values += [""] * (max_length - len(self.payload2_values))
+
         parser = HTTPRequestParser()
-        for value1 in self.payload1_values:
-            value1 = value1.strip()
-            # print(value1)
-            updated1_request = raw_request.replace("$value1$", value1)
+        for value1, value2 in zip(self.payload1_values, self.payload2_values):
+            updated_request = raw_request.replace("$value1$", value1).replace("$value2$", value2)
+            url = parser.extract_url(updated_request)
+            data = parser.extract_data(updated_request)
+            parameters = parser.extract_parameters(updated_request)
+            headers = parser.parse_raw_headers(updated_request)
 
-            for value2 in self.payload2_values:
-                value2 = value2.strip()
-                updated2_request = updated1_request.replace("$value2$", value2)
+            self.response_text.append(f"URL: {url}")
+            self.response_text.append(f"Data: {data}")
+            self.response_text.append(f"Parameters: {parameters}")
+            self.response_text.append(f"Headers: {headers}")
 
-                
-                url = parser.extract_url(updated2_request)
-                data = parser.extract_data(updated2_request)
-                parameters = parser.extract_parameters(updated2_request)
-                headers = parser.parse_raw_headers(updated2_request)
+            if data:
+                method = "POST"
+            else:
+                method = "GET"
 
-                self.response_text.append(f"URL: {url}")
-                self.response_text.append(f"Data: {data}")
-                self.response_text.append(f"Parameters: {parameters}")
-                self.response_text.append(f"Headers: {headers}")
-
-                if data:
-                    method = "POST"
-                else:
-                    method = "GET"
-
-                try:
+            try:
                     if method == "POST":
                         response = requests.post(url, headers=headers, data=data, params=parameters)
                     else:
@@ -175,7 +171,7 @@ class ClasterBombTab(QWidget):
                     self.response_text.append(f"Response Content Length: {len(response.content)}")
                     self.response_text.append(f"Response Body: {response.text}")
 
-                except Exception as e:
+            except Exception as e:
                     self.response_text.append(f"Error: {str(e)}")
 
     def search_response(self):
