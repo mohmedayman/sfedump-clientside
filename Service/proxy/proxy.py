@@ -30,13 +30,13 @@ class ProxyService(BaseService):
         self.button.setDisabled(False)
         print(res)
 
-    def start(self, ):
+    def start(self, port: str):
 
         self.button.setDisabled(True)
 
         # self.worker = NetworkSniffer(self.main, interface, filter)
 
-        self.worker = ProxyWorker(self.main)
+        self.worker = ProxyWorker(self.main, port)
         self.toggle_fun()
         self.worker.start()
         self.worker.output_signal.connect(self.on_output_signal)
@@ -47,10 +47,9 @@ class ProxyService(BaseService):
         while self.output.count():
             child = self.output.takeAt(0)
             if child.widget():
-                 child.widget().deleteLater()
+                child.widget().deleteLater()
         self.output.addStretch()
 
-    
     def kill(self):
         self.worker.terminate_signal.emit("terminate")
 

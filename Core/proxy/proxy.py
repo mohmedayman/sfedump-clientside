@@ -13,12 +13,13 @@ class ProxyWorker(QtCore.QThread):
     kill_signal = QtCore.pyqtSignal(bool)
     terminate_signal = QtCore.pyqtSignal(str)
 
-    def __init__(self, parent):
+    def __init__(self, parent, port: str = "8080"):
         QtCore.QThread.__init__(self, parent)
 
         self.terminate_signal.connect(self.on_terminate_signal)
         self.process = None
         self.is_terminated = False
+        self.port = port
 
     @QtCore.pyqtSlot(str)
     def on_terminate_signal(self, event: str):
@@ -32,9 +33,12 @@ class ProxyWorker(QtCore.QThread):
     def run(self):
 
         # Start capturing packets with the initial filter condition
-
+        if not self.port:
+            self.port = "8080"
+            
         self.process = subprocess.Popen(
-            ["mitmdump", "-q", "-s", "./script.py"],
+            ["mitmdump", "-q", "-s", "./script.py",
+                "--set", "listen_port="+self.port, ],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             cwd=os.getcwd()+"/Core/proxy"
@@ -43,7 +47,7 @@ class ProxyWorker(QtCore.QThread):
         while not self.is_terminated:
 
             output = self.process.stdout.readline().decode().strip()
-            
+
             if not output:
                 continue
 
