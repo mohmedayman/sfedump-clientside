@@ -22,6 +22,16 @@ class Validator():
             self.errors.append("Invalid Domain")
 
         return self
+    
+    def url(self, url: Optional[str], nullable: Optional[bool] = False):
+        if nullable and not url:
+            return self
+
+        val = validators.url(url)
+        if not val:
+            self.errors.append("Invalid URL")
+
+        return self
 
     def ip(self, ip: Optional[str], nullable: Optional[bool] = False):
         if nullable and not ip:
