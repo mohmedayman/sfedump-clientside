@@ -11,6 +11,7 @@ from Screens.Comparer.comparer import *
 from Screens.Extender.extender import *
 from Screens.Network.network import *
 from Screens.Web_vulnerability.Web_vulnerability import *
+from Screens.Web_vulnerability.JWT.jwt import *
 from Screens.DNS.dns import *
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QTextEdit, QTableWidget, QTableWidgetItem, QComboBox, QMessageBox, QLineEdit, QCheckBox, QListWidget, QFileDialog
 from PyQt5.QtGui import QIcon
@@ -60,8 +61,9 @@ class MainApp(QMainWindow):
         # setup_sniffer_tab(self)
         # setup_exploiter_tab(self)
         setup_web_vulnerability_tab(self)
+        setup_jwt_tab(self)
         setup_network_tab(self)
-        setup_dashboard_tab(self)
+        # setup_dashboard_tab(self)
         setup_dns_tab(self)
 
 
