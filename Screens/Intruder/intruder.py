@@ -9,8 +9,8 @@ def setup_intruder_tab(parent):
 
     sniper_tab = SniperTab()
     claster_bom_tab = ClasterBombTab()
-    # pitch_fork_tab = PitchForkTab()
-    pitch_fork_tab=QWidget()
+    pitch_fork_tab = PitchForkTab()
+    # pitch_fork_tab=QWidget()
 
     sub_tabs.addTab(sniper_tab, "Sniper")
     sub_tabs.addTab(claster_bom_tab, "Claster bom")
