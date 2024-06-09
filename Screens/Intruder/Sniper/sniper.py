@@ -1,15 +1,18 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QTextEdit, QWidget, QTabWidget,QFileDialog
+from PyQt5.QtWidgets import (
+    QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel,
+    QLineEdit, QPushButton, QTextEdit, QWidget, QTabWidget, QFileDialog,
+    QMessageBox, QTableWidget, QTableWidgetItem, QInputDialog,QHeaderView
+)
 import requests
-from PyQt5.QtCore import Qt, QObject
-from Widgets.InputBox import *
-from Widgets.ResponseBox import *
-from Widgets.SendButton import *
-from Widgets.FunctionalButton import *
-from Widgets.TargetInput import *
-import itertools
-from urllib.parse import urlunsplit, urlparse, parse_qs
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QColor, QBrush
+from Widgets.InputBox import InputBox
+from Widgets.ResponseBox import ResponseBox
+from Widgets.SendButton import SendButton
+from Widgets.FunctionalButton import FunctionalButton
 from Screens.http_request_parser import HTTPRequestParser
+import itertools
 
 class SniperTab(QWidget):
     def __init__(self):
@@ -33,7 +36,7 @@ class SniperTab(QWidget):
         self.payload_text.setPlaceholderText("payloads")
         layout.addWidget(self.payload_text)
 
-        hbox1=QHBoxLayout()
+        hbox1 = QHBoxLayout()
         self.load_payload_button = FunctionalButton()
         self.load_payload_button.setText("Load payload")
         self.load_payload_button.clicked.connect(self.load_payload)
@@ -52,14 +55,29 @@ class SniperTab(QWidget):
         # Response section
         self.response_label = QLabel("Response:")
         layout.addWidget(self.response_label)
-        self.response_text = ResponseBox()
-        layout.addWidget(self.response_text)
+
+        self.response_table = QTableWidget()
+        self.response_table.setColumnCount(7)  # Add "Comment" column
+        self.response_table.setHorizontalHeaderLabels(
+            ["Request", "Payload", "Status code", "Response received", "Error", "Length", "Comment"]
+        )
+        self.response_table.itemSelectionChanged.connect(self.display_response_body)
+        self.response_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.response_table.horizontalHeader().setStyleSheet("QHeaderView::section { background-color: rgb(245, 245, 245);border: 1px solid rgb(245, 245, 245); }")
+        self.response_table.setAlternatingRowColors(True)
+        
+        layout.addWidget(self.response_table)
+
+        self.response_body_label = QLabel("Response Body:")
+        layout.addWidget(self.response_body_label)
+        self.response_body_text = ResponseBox()
+        layout.addWidget(self.response_body_text)
+
+        self.response_bodies = []  # List to store response bodies
 
         self.search_button = FunctionalButton("Search response")
         self.search_button.clicked.connect(self.search_response)
         layout.addWidget(self.search_button)
-
-        
 
         self.setLayout(layout)
 
@@ -98,18 +116,19 @@ class SniperTab(QWidget):
 
     def run_sniper_attack(self):
         raw_request = self.raw_request_text.toPlainText()
-        # payload_values = self.payload_text.toPlainText().split(',')
-        # search_string = self.search_string_input.text()
 
         if not raw_request:
             QMessageBox.warning(self, "Error", "Please enter a valid HTTP request.")
             return
 
-        if not self.payload_values:
+        if not hasattr(self, 'payload_values') or not self.payload_values:
             QMessageBox.warning(self, "Error", "Please load or enter payloads.")
             return
 
-        for value in self.payload_values:
+        self.response_table.setRowCount(0)  # Clear previous results
+        self.response_bodies = []  # Clear previous response bodies
+
+        for index, value in enumerate(self.payload_values):
             value = value.strip()
             modified_request = raw_request.replace("$value$", value)
 
@@ -120,13 +139,8 @@ class SniperTab(QWidget):
             headers = parser.parse_raw_headers(modified_request)
 
             if not url:
-                self.response_text.append("Error: Invalid URL.")
+                self.add_response_to_table(index, value,"404","Invalid URL", "-", "-", "-", "-")
                 continue
-
-            self.response_text.append(f"URL: {url}")
-            self.response_text.append(f"Data: {data}")
-            self.response_text.append(f"Parameters: {parameters}")
-            self.response_text.append(f"Headers: {headers}")
 
             if data:
                 method = "POST"
@@ -139,12 +153,40 @@ class SniperTab(QWidget):
                 else:
                     response = requests.get(url, headers=headers, params=parameters)
 
-                self.response_text.append(f"Response Status Code: {response.status_code}")
-                self.response_text.append(f"Response Content Length: {len(response.content)}")
-                self.response_text.append(f"Response Body: {response.text}")
+                self.add_response_to_table(index, value, response.status_code, "-", response.elapsed.microseconds / 1000, len(response.content), "-", "-")
+                self.response_bodies.append(response.text)
 
             except Exception as e:
-                self.response_text.append(f"Error: {str(e)}")
+                self.add_response_to_table(index, value, "Error", str(e), "-", "-", "-", "-")
+                self.response_bodies.append("Error: " + str(e))
+
+    def add_response_to_table(self, request, payload, status_code, error, response_received, length,timeout ,comment):
+        row_position = self.response_table.rowCount()
+        self.response_table.insertRow(row_position)
+        self.response_table.setItem(row_position, 0, QTableWidgetItem(str(request)))
+        self.response_table.setItem(row_position, 1, QTableWidgetItem(payload))
+        self.response_table.setItem(row_position, 2, QTableWidgetItem(str(status_code)))
+        self.response_table.setItem(row_position, 3, QTableWidgetItem(str(response_received)))
+        self.response_table.setItem(row_position, 4, QTableWidgetItem(error))
+        self.response_table.setItem(row_position, 5, QTableWidgetItem(str(length)))
+        self.response_table.setItem(row_position, 6, QTableWidgetItem(comment))  # Add comment to table
+
+
+    def display_response_body(self):
+        selected_items = self.response_table.selectedItems()
+        if selected_items:
+            row = selected_items[0].row()
+            response_body = self.response_bodies[row]
+            self.response_body_text.setPlainText(response_body)
 
     def search_response(self):
-        self.response_text.search_response(self)
+        search_word, ok = QInputDialog.getText(self, "Search Response", "Enter the word to search for:")
+        if not ok or not search_word:
+            return
+
+        for row in range(self.response_table.rowCount()):
+            response_body = self.response_bodies[row]
+            if search_word in response_body:
+                self.response_table.setItem(row, 6, QTableWidgetItem("Found"))
+            else:
+                self.response_table.setItem(row, 6, QTableWidgetItem("Not Found"))

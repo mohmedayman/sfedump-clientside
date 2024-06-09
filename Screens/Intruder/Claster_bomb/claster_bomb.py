@@ -1,5 +1,5 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QLabel,QFileDialog, QLineEdit, QPushButton, QTextEdit, QWidget, QTabWidget
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout,QTableWidget, QTableWidgetItem, QInputDialog,QHeaderView, QHBoxLayout, QLabel,QFileDialog, QLineEdit, QPushButton, QTextEdit, QWidget, QTabWidget
 import requests
 from PyQt5.QtCore import Qt, QObject
 from Widgets.InputBox import *
@@ -70,8 +70,25 @@ class ClasterBombTab(QWidget):
         # Response section
         self.response_label = QLabel("Response:")
         layout.addWidget(self.response_label)
-        self.response_text = ResponseBox()
-        layout.addWidget(self.response_text)
+
+        self.response_table = QTableWidget()
+        self.response_table.setColumnCount(8)  # Add "Comment" column
+        self.response_table.setHorizontalHeaderLabels(
+            ["Request", "Payload1","Payload2" ,"Status code", "Response received", "Error", "Length", "Comment"]
+        )
+        self.response_table.itemSelectionChanged.connect(self.display_response_body)
+        self.response_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.response_table.horizontalHeader().setStyleSheet("QHeaderView::section { background-color: rgb(245, 245, 245);border: 1px solid rgb(245, 245, 245); }")
+        self.response_table.setAlternatingRowColors(True)
+        
+        layout.addWidget(self.response_table)
+
+        self.response_body_label = QLabel("Response Body:")
+        layout.addWidget(self.response_body_label)
+        self.response_body_text = ResponseBox()
+        layout.addWidget(self.response_body_text)
+
+        self.response_bodies = []  # List to store response bodies
 
         self.search_button = FunctionalButton("Search response")
         self.search_button.clicked.connect(self.search_response)
@@ -140,6 +157,7 @@ class ClasterBombTab(QWidget):
             return
 
         parser = HTTPRequestParser()
+        index=0
         for value1 in self.payload1_values:
             value1 = value1.strip()
             # print(value1)
@@ -155,10 +173,9 @@ class ClasterBombTab(QWidget):
                 parameters = parser.extract_parameters(updated2_request)
                 headers = parser.parse_raw_headers(updated2_request)
 
-                self.response_text.append(f"URL: {url}")
-                self.response_text.append(f"Data: {data}")
-                self.response_text.append(f"Parameters: {parameters}")
-                self.response_text.append(f"Headers: {headers}")
+                if not url:
+                    self.add_response_to_table(index, value1,value2, "-", "Invalid URL","-", "-", "-", "-")
+                    continue
 
                 if data:
                     method = "POST"
@@ -171,12 +188,43 @@ class ClasterBombTab(QWidget):
                     else:
                         response = requests.get(url, headers=headers, params=parameters)
 
-                    self.response_text.append(f"Response Status Code: {response.status_code}")
-                    self.response_text.append(f"Response Content Length: {len(response.content)}")
-                    self.response_text.append(f"Response Body: {response.text}")
+                    self.add_response_to_table(index, value1,value2, response.status_code, "-", response.elapsed.microseconds / 1000, len(response.content), "-", "-")
+                    self.response_bodies.append(response.text)
 
                 except Exception as e:
-                    self.response_text.append(f"Error: {str(e)}")
+                    self.add_response_to_table(index, value1,value2, "Error", str(e), "-", "-", "-", "-")
+                    self.response_bodies.append("Error: " + str(e))
+
+                index=index+1
+
+    def add_response_to_table(self, request, payload1,payload2, status_code, error, response_received, length,timeout ,comment):
+        row_position = self.response_table.rowCount()
+        self.response_table.insertRow(row_position)
+        self.response_table.setItem(row_position, 0, QTableWidgetItem(str(request)))
+        self.response_table.setItem(row_position, 1, QTableWidgetItem(payload1))
+        self.response_table.setItem(row_position, 2, QTableWidgetItem(payload2))
+        self.response_table.setItem(row_position, 3, QTableWidgetItem(str(status_code)))
+        self.response_table.setItem(row_position, 4, QTableWidgetItem(str(response_received)))
+        self.response_table.setItem(row_position, 5, QTableWidgetItem(error))
+        self.response_table.setItem(row_position, 6, QTableWidgetItem(str(length)))
+        self.response_table.setItem(row_position, 7, QTableWidgetItem(comment))  # Add comment to table
+
+
+    def display_response_body(self):
+        selected_items = self.response_table.selectedItems()
+        if selected_items:
+            row = selected_items[0].row()
+            response_body = self.response_bodies[row]
+            self.response_body_text.setPlainText(response_body)
 
     def search_response(self):
-        self.response_text.search_response(self)
+        search_word, ok = QInputDialog.getText(self, "Search Response", "Enter the word to search for:")
+        if not ok or not search_word:
+            return
+
+        for row in range(self.response_table.rowCount()):
+            response_body = self.response_bodies[row]
+            if search_word in response_body:
+                self.response_table.setItem(row, 7, QTableWidgetItem("Found"))
+            else:
+                self.response_table.setItem(row, 7, QTableWidgetItem("Not Found"))
