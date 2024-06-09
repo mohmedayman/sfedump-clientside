@@ -8,8 +8,7 @@ from Widgets.TargetInput import *
 from Widgets.StopButton import *
 from Service.proxy import ProxyService
 from typing import Optional
-from Widgets import CollapsibleBox
-import random
+
 
 
 def setup_proxy_tab(parent):
@@ -30,6 +29,16 @@ def setup_proxy_tab(parent):
     search_button = SearchButton(title="Start")
     stop_button = StopButton(title="Stop")
     clear_button = ClearButton()
+    
+    
+    # Add input box and dropdown list
+    input_layout = QVBoxLayout()
+    
+    target_input = TargetInput()
+    target_input.setPlaceholderText("8080")
+    
+    input_layout.addWidget(target_input)
+
 
     # clear_button.clicked.connect(res_box.clear_text)
     
@@ -59,13 +68,14 @@ def setup_proxy_tab(parent):
 
     # vlay.addLayout(vlay)
     vlay.addLayout(button_layout)
+    vlay.addLayout(input_layout)
     vlay.addLayout(boxes_layout)
     boxes_layout.setDirection(QtWidgets.QBoxLayout.Direction.TopToBottom)
 
     service = ProxyService(parent, button=search_button,
                            toggle_fun=toggle_buttons, output=boxes_layout)
 
-    search_button.clicked.connect(lambda _: service.start())
+    search_button.clicked.connect(lambda _: service.start(target_input.text()))
     stop_button.clicked.connect(lambda: service.kill())
     clear_button.clicked.connect(lambda: service.clearOutput())
 
