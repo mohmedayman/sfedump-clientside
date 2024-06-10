@@ -6,6 +6,7 @@ from Widgets.InputBox import *
 from Widgets.ResponseBox import *
 from Widgets.SendButton import *
 from Widgets.FunctionalButton import *
+from Widgets.StopButton import StopButton
 from Widgets.TargetInput import *
 import itertools
 from urllib.parse import urlunsplit, urlparse, parse_qs
@@ -80,7 +81,7 @@ class PitchForkTab(QWidget):
         self.response_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.response_table.horizontalHeader().setStyleSheet("QHeaderView::section { background-color: rgb(245, 245, 245);border: 1px solid rgb(245, 245, 245); }")
         self.response_table.setAlternatingRowColors(True)
-        
+        self.response_table.verticalHeader().setSectionResizeMode(QHeaderView.Stretch)
         layout.addWidget(self.response_table)
 
         self.response_body_label = QLabel("Response Body:")
@@ -93,8 +94,16 @@ class PitchForkTab(QWidget):
         self.search_button = FunctionalButton("Search response")
         self.search_button.clicked.connect(self.search_response)
         layout.addWidget(self.search_button)
-        
-
+        self.stop_button = StopButton()
+        self.stop_button.setText("Stop PitchFork Attack")
+        self.stop_button.clicked.connect(self.stop_PitchFork_attack)
+        self.stop_button.setVisible(False)
+        layout.addWidget(self.stop_button)
+        self.response_label.setVisible(False)
+        self.response_table.setVisible(False)
+        self.response_body_label.setVisible(False)
+        self.response_body_text.setVisible(False)
+        self.search_button.setVisible(False)
         self.setLayout(layout)
 
     def load_payload1(self):
@@ -145,8 +154,30 @@ class PitchForkTab(QWidget):
         return passwords
 
     def run_PitchFork_attack(self):
+        # Show response section
+        self.response_label.setVisible(True)
+        self.response_table.setVisible(True)
+        self.response_body_label.setVisible(True)
+        self.response_body_text.setVisible(True)
+        self.search_button.setVisible(True)
+        self.stop_button.setVisible(True)
+
+
+        # Hide input fields and disable buttons
+        self.raw_request_label.setVisible(False)
+        self.raw_request_text.setVisible(False)
+        self.payload1_label.setVisible(False)
+        self.payload1_text.setVisible(False)
+        self.load_payload1_button.setVisible(False)
+        self.generate_payload1_button.setVisible(False)
+        self.payload2_label.setVisible(False)
+        self.payload2_text.setVisible(False)
+        self.load_payload2_button.setVisible(False)
+        self.generate_payload2_button.setVisible(False)
+        self.PitchFork_button.setVisible(False)
+
+        # Execute attack
         raw_request = self.raw_request_text.toPlainText()
-        # payload_values = self.payload_text.toPlainText().split(',')
         if not raw_request:
             QMessageBox.warning(self, "Error", "Please enter a valid HTTP request.")
             return
@@ -160,7 +191,7 @@ class PitchForkTab(QWidget):
         self.payload2_values += [""] * (max_length - len(self.payload2_values))
 
         parser = HTTPRequestParser()
-        index=0
+        index = 0
         for value1, value2 in zip(self.payload1_values, self.payload2_values):
             updated_request = raw_request.replace("$value1$", value1).replace("$value2$", value2)
             url = parser.extract_url(updated_request)
@@ -169,28 +200,51 @@ class PitchForkTab(QWidget):
             headers = parser.parse_raw_headers(updated_request)
 
             if not url:
-                    self.add_response_to_table(index, value1,value2, "-", "Invalid URL","-", "-", "-", "-")
-                    continue
+                self.add_response_to_table(index, value1, value2, "-", "Invalid URL", "-", "-", "-", "-")
+                continue
 
             if data:
-                    method = "POST"
+                method = "POST"
             else:
-                    method = "GET"
+                method = "GET"
 
             try:
-                    if method == "POST":
-                        response = requests.post(url, headers=headers, data=data, params=parameters)
-                    else:
-                        response = requests.get(url, headers=headers, params=parameters)
+                if method == "POST":
+                    response = requests.post(url, headers=headers, data=data, params=parameters)
+                else:
+                    response = requests.get(url, headers=headers, params=parameters)
 
-                    self.add_response_to_table(index, value1,value2, response.status_code, "-", response.elapsed.microseconds / 1000, len(response.content), "-", "-")
-                    self.response_bodies.append(response.text)
+                self.add_response_to_table(index, value1, value2, response.status_code, "-", response.elapsed.microseconds / 1000, len(response.content), "-", "-")
+                self.response_bodies.append(response.text)
 
             except Exception as e:
-                    self.add_response_to_table(index, value1,value2, "Error", str(e), "-", "-", "-", "-")
-                    self.response_bodies.append("Error: " + str(e))
+                self.add_response_to_table(index, value1, value2, "Error", str(e), "-", "-", "-", "-")
+                self.response_bodies.append("Error: " + str(e))
 
-            index=index+1
+            index = index + 1
+
+    def stop_PitchFork_attack(self):
+        # Hide response section
+        self.response_label.setVisible(False)
+        self.response_table.setVisible(False)
+        self.response_body_label.setVisible(False)
+        self.response_body_text.setVisible(False)
+        self.search_button.setVisible(False)
+        self.stop_button.setVisible(False)
+
+
+        # Show input fields and enable buttons
+        self.raw_request_label.setVisible(True)
+        self.raw_request_text.setVisible(True)
+        self.payload1_label.setVisible(True)
+        self.payload1_text.setVisible(True)
+        self.load_payload1_button.setVisible(True)
+        self.generate_payload1_button.setVisible(True)
+        self.payload2_label.setVisible(True)
+        self.payload2_text.setVisible(True)
+        self.load_payload2_button.setVisible(True)
+        self.generate_payload2_button.setVisible(True)
+        self.PitchFork_button.setVisible(True)
 
     def add_response_to_table(self, request, payload1,payload2, status_code, error, response_received, length,timeout ,comment):
         row_position = self.response_table.rowCount()
