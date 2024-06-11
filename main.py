@@ -56,7 +56,7 @@ class MainApp(QMainWindow):
         setup_intruder_tab(self)
         # setup_repeater_tab()
         # setup_comparer_tab(self)
-        setup_extender_tab(self)
+        # setup_extender_tab(self)
         # setup_scanning_tab(self)
         # setup_sniffer_tab(self)
         # setup_exploiter_tab(self)
