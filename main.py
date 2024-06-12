@@ -25,10 +25,10 @@ class MainApp(QMainWindow):
         self.widget = QWidget()                 # Widget that contains the collection of Vertical Box
         self.vbox = QVBoxLayout()
 
-        self.setWindowTitle("Penteration testing platform")
+        self.setWindowTitle("SFEDump")
 
         self.setGeometry(100, 100, 1200, 850)
-        self.setWindowIcon(QIcon("assets/images/icon.jpeg"))
+        self.setWindowIcon(QIcon("assets/images/icon2.jpg"))
         main_widget = QWidget()
         self.setCentralWidget(main_widget)
 
@@ -56,7 +56,7 @@ class MainApp(QMainWindow):
         setup_intruder_tab(self)
         # setup_repeater_tab()
         # setup_comparer_tab(self)
-        setup_extender_tab(self)
+        # setup_extender_tab(self)
         # setup_scanning_tab(self)
         # setup_sniffer_tab(self)
         # setup_exploiter_tab(self)
