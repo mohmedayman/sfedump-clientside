@@ -52,4 +52,4 @@ class NetworkSniffer(QtCore.QThread):
             self.output_signal.emit(output)
 
         # Wait for the tcpdump process to finish
-            #self.process.wait()
+            # self.process.wait()

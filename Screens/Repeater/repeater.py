@@ -76,7 +76,7 @@ class RepeaterTab(QWidget):
         self.setLayout(layout)
 
     def send_request(self):
-        raw_request = self.request_text.toPlainText()
+        raw_request = self.request_text.toPlainText().strip()
         parser = HTTPRequestParser()
 
         url = parser.extract_url(raw_request)
@@ -89,14 +89,15 @@ class RepeaterTab(QWidget):
             QMessageBox.information(self, "Send Request", "Invalid URL in the request.")
             return
 
+
         try:
             if method == "GET":
                 response = requests.get
                 runnable = Runnable(self, response, url, headers=headers, params=parameters)
                 QThreadPool.globalInstance().start(runnable)
             elif method == "POST":
-                url = self.extract_url(raw_request)
-                data = self.extract_data(raw_request)
+                url = parser.extract_url(raw_request)
+                data = parser.extract_data(raw_request)
 
                 response = requests.post
                 runnable = Runnable(self, response, url, headers=headers, data=data, params=parameters)

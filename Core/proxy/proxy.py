@@ -54,5 +54,3 @@ class ProxyWorker(QtCore.QThread):
             # Implement your packet processing logic here
             self.output_signal.emit(output)
 
-        # Wait for the tcpdump process to finish
-            # self.process.wait()
