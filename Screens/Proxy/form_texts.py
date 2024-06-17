@@ -2,6 +2,7 @@ req_text = """
 {method} {path} {http_version}
 Host:{host}
 {headers}
+Cookie:{cookie}
 
 {content}
 """
