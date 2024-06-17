@@ -14,7 +14,7 @@ class ProxyResBox:
 
     def generateBox(self) -> CollapsibleBox:
         # print(self.req, self.res)
-        box = CollapsibleBox(self.req.pretty_host)
+        box = CollapsibleBox(self.req.url)
         color = QtGui.QColor(*[216 for _ in range(3)])
 
         lay = QtWidgets.QHBoxLayout()
