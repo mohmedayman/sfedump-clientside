@@ -210,7 +210,8 @@ class PitchForkTab(QWidget):
 
             try:
                 if method == "POST":
-                    response = requests.post(url, headers=headers, data=data, params=parameters)
+                    response = requests.Session().post(
+                        url, headers=headers, params=parameters, **data)
                 else:
                     response = requests.get(url, headers=headers, params=parameters)
 
