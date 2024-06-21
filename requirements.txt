@@ -42,6 +42,7 @@ PyQt5-sip==12.13.0
 pyqtspinner==2.0.0
 python3-nmap==1.6.0
 requests==2.31.0
+requests-toolbelt==1.0.0
 ruamel.yaml==0.18.6
 ruamel.yaml.clib==0.2.8
 scapy==2.5.0

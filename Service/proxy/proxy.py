@@ -34,7 +34,6 @@ class ProxyService(BaseService):
 
         self.button.setDisabled(True)
 
-        # self.worker = NetworkSniffer(self.main, interface, filter)
 
         self.worker = ProxyWorker(self.main, port)
         self.toggle_fun()
@@ -56,7 +55,7 @@ class ProxyService(BaseService):
     @pyqtSlot(str)
     def on_output_signal(self, output: str):
         output = literal_eval(output)
-        # self.output.append(str(output['response']['headers']))
+        
         box = ProxyResBox(flow_dict=output)
         self.output.insertWidget(
             len(self.output) - 1, box.generateBox(), alignment=Qt.AlignTop)

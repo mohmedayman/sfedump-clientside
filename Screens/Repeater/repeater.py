@@ -17,6 +17,7 @@ from PyQt5.QtCore import QRunnable, QThread, QMetaObject, Q_ARG, Qt, QProcess
 from PyQt5.QtCore import pyqtSlot, QThreadPool, QObject
 from Screens.http_request_parser import HTTPRequestParser
 
+
 class RepeaterTab(QWidget):
     def __init__(self):
         super().__init__()
@@ -84,23 +85,27 @@ class RepeaterTab(QWidget):
         data = parser.extract_data(raw_request)
         parameters = parser.extract_parameters(raw_request)
         headers = parser.parse_raw_headers(raw_request)
-
+        cookie = parser.extract_cookie(raw_request)
+        
         if not url:
             QMessageBox.information(self, "Send Request", "Invalid URL in the request.")
             return
+                
 
 
         try:
             if method == "GET":
                 response = requests.get
-                runnable = Runnable(self, response, url, headers=headers, params=parameters)
+                runnable = Runnable(
+                    self, response, url, headers=headers, params=parameters, cookies=cookie)
                 QThreadPool.globalInstance().start(runnable)
             elif method == "POST":
                 url = parser.extract_url(raw_request)
                 data = parser.extract_data(raw_request)
-
-                response = requests.post
-                runnable = Runnable(self, response, url, headers=headers, data=data, params=parameters)
+                
+                response = requests.Session().post
+                runnable = Runnable(self, response, url=url,
+                                    headers=headers, params=parameters, cookies=cookie, **data)
                 QThreadPool.globalInstance().start(runnable)
             else:
                 QMessageBox.information(self, "Send Request", "Unsupported HTTP method.")

@@ -14,7 +14,7 @@ class ProxyResBox:
 
     def generateBox(self) -> CollapsibleBox:
         # print(self.req, self.res)
-        box = CollapsibleBox(self.req.pretty_host)
+        box = CollapsibleBox(self.req.url[:150])
         color = QtGui.QColor(*[216 for _ in range(3)])
 
         lay = QtWidgets.QHBoxLayout()
@@ -29,10 +29,12 @@ class ProxyResBox:
             path=self.req.path,
             http_version=self.req.data.http_version.decode(),
             host=self.req.host_header,
-            headers='\n'.join(str(k)+": "+str(v)
-                              for k, v in self.req.headers.items()),
+            headers='\n'.join(str(k).capitalize()+": "+str(v)
+                              for k, v in self.req.headers.items() if k.lower() != "cookie"),
+            cookie=";".join(map(lambda cookie: str(
+                cookie[0])+"="+str(cookie[1]), self.req._get_cookies())),
             content=self.req.get_text()
-        )
+        ).strip()
         )
 
         resBox = ResponseBox()
@@ -48,7 +50,7 @@ class ProxyResBox:
             headers='\n'.join(str(k)+": "+str(v)
                               for k, v in self.res.headers.items()),
             content=self.res.get_text()
-        )
+        ).strip()
         )
         lay.addWidget(reqBox)
         lay.addWidget(resBox)
