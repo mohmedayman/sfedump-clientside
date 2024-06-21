@@ -93,6 +93,16 @@ class Validator():
 
         return self
 
+    def bool(self, value: Optional[any], nullable: Optional[bool] = False):
+        if nullable and not value:
+            return self
+
+        if not isinstance(value, bool):
+            self.errors.append(
+                f"value should be bool")
+
+        return self
+
     def validate(self):
 
         if len(self.errors) > 0:
